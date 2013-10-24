@@ -1,0 +1,40 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="css">
+      <UniqueIdentifier>{c93860c1-ab8d-4278-a945-e849c787088c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="js">
+      <UniqueIdentifier>{b4f1151b-f6da-4d8b-80ef-1011600287ac}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="manifest.json" />
+    <None Include="tabs.html" />
+    <None Include="css\github.css">
+      <Filter>css</Filter>
+    </None>
+    <None Include="css\main.css">
+      <Filter>css</Filter>
+    </None>
+    <None Include="js\jquery.min.js">
+      <Filter>js</Filter>
+    </None>
+    <None Include="js\rainbow-custom.min.js">
+      <Filter>js</Filter>
+    </None>
+    <None Include="js\tutorial.js">
+      <Filter>js</Filter>
+    </None>
+    <None Include="js\albumradio.js">
+      <Filter>js</Filter>
+    </None>
+    <None Include="oldindex.html" />
+    <None Include="index.html" />
+    <None Include="README.md" />
+    <None Include="Proposal.md" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="albumradio.png" />
+  </ItemGroup>
+</Project>

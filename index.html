@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<head>
+    <!-- Spotify CSS files -->
+    <!-- old <link rel="stylesheet" type="text/css" href="sp://resources/css/eve.css">
+    <link rel="stylesheet" type="text/css" href="sp://resources/css/api.css">
+    <link rel="stylesheet" type="text/css" href="sp://resources/css/player.css">
+    <link rel="stylesheet" type="text/css" href="sp://resources/css/list.css">-->
+    <!-- new <link rel="stylesheet" href="$views/css/buttons.css">
+<link rel="stylesheet" href="$views/css/image.css">
+<link rel="stylesheet" href="$views/css/list.css">
+<link rel="stylesheet" href="$views/css/popup.css">
+<link rel="stylesheet" href="$views/css/scrollbar.css">
+<link rel="stylesheet" href="$views/css/tabbar.css">-->
+    <link rel="stylesheet" href="$views/css/throbber.css"> 
+    <link rel="stylesheet" href="$views/css/image.css">
+    <!-- Project CSS files -->
+    <link rel="stylesheet" type="text/css" href="css/main.css">
+    <link rel="stylesheet" type="text/css" href="css/github.css">
+</head>
+<body>
+    <div id="wrapper">
+<div class="section">
+    <h1>Album Radio</h1>
+    <p class="description">Hey this is the number one open source Spotify app for album radio!</p>
+    <div>
+        <div class="readmore">A few things you should know before you get started - <a href="#">Show</a></div>
+        <ol class="hide">
+            <li>This app can only work while you're here (and for 60 seconds after you leave)
+                <ul><li>You can use this to your advantage, if you don't know if you want artists related to this artist added</li></ul>
+            </li>
+            <li>You can only operate the radio on your own playlists, and you need to create one for me yourself along with one or more songs.
+                <ul>
+                    <li>It's recommended to take a few songs from favorite artists to initially populate the playlist</li>
+                    <li>You can switch between multiple playlists, just drag them to the playlist box below</li>
+                </ul>
+            </li>
+            <li>Album Radio deletes played songs from the start of your playlist
+            </li>
+        </ol>
+    </div>
+
+    <h3>Drop the playlist you want Album Radio to manage in here</h3>
+    <div id="drop_box"></div>
+    
+    <h3>Activity Log</h3>
+    <div id="debugging"></div>
+</div>
+    </div>
+    <script src="/js/jquery.min.js"></script>
+    <script src="/js/albumradio.js"></script>
+  </body>
+</html>
