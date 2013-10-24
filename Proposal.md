@@ -1,7 +1,7 @@
-App Name: Album Radio
-Name: Thomas Matelich
-Company: Personal development / open source
-Website: twitter.com/matelich
+App Name: Album Radio  
+Name: Thomas Matelich  
+Company: Personal development / open source  
+Website: twitter.com/matelich  
 Short description: The Album Radio app gives users radio functionality while having the full album experience. 
 
 I enjoy listening to entire albums as artists often have an overarching theme to their 
