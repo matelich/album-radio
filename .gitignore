@@ -1,1 +1,6 @@
 *.swp
+*.sdf
+*.opensdf
+*.suo
+Debug
+tutorials
