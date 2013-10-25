@@ -66,10 +66,53 @@ require([
     //ENDREGION drag/drop
 
     //REGION utility funcs
+    function deleteAlbum(e) {
+        var playlist = models.Playlist.fromURI(localStorage.album_radio_playlist);
+        playlist.load('tracks').done(function (tracks) {
+            playlist.tracks.snapshot(0, 20).done(function (s) {
+                s.loadAll('album').done(function (sn) { deleteAlbumTracks(playlist, e.target.parentNode.getAttribute('data-uri'), s, sn, 0); });
+            });
+        });
+    }
+
+    function deleteAlbumTracks(playlist, album_uri, snappy, snap_tracks, start_index) {
+        if (snap_tracks.length == 0) { return; }
+
+        for (var i = 0; i < snap_tracks.length; i++) {
+            if (snap_tracks[i].album.uri.substr(-22) == album_uri.substr(-22)) //substr because this check was failing, and substr forces a string format(?)
+            {
+                if (i == snap_tracks.length - 1 && snap_tracks.length != 1) { //we need to have the song after the one we're deleting, so just get the next snap with this one included
+                    playlist.tracks.snapshot(start_index + i, 20).done(function (s) {
+                        s.loadAll('album').done(function (sn) { deleteAlbumTracks(playlist, album_uri, s, sn, start_index + i); });
+                    });
+                } else {
+                    var done_with_album = (snap_tracks.length == 1 || (snap_tracks[i].album != snap_tracks[i + 1].album));
+                    var index_to_delete = i;
+                    if (snap_tracks.length != snappy.length) {
+                        index_to_delete = start_index + i; //yes, this is scary.  I don't like it one little bit.  But it seems to work
+                    }
+                    playlist.tracks.remove(snappy.ref(index_to_delete)).done(function () {
+                        console.log('deleted a song from album');
+                        if (done_with_album) {
+                            populateAlbumsBox();
+                            return;
+                        }
+                        playlist.tracks.snapshot(start_index + i, 20).done(function (s) {
+                            s.loadAll('album').done(function (sn) { deleteAlbumTracks(playlist, album_uri, s, sn, start_index + i); });
+                        });
+                    }).fail(function (blah, err) { console.log("failed to delete song " + err.message); });
+                }
+                return; //the for loop continues in the recursion
+            }
+        }
+        playlist.tracks.snapshot(start_index + snap_tracks.length, 20).done(function (s) {
+            s.loadAll('album').done(function (sn) { deleteAlbumTracks(playlist, album_uri, s, sn, start_index + i); });
+        });
+    }
+
+    //don't pass stuff in to this, let it handle the params itself
     function populateAlbumsBox(snapshot, index, last_loaded_uri) {
-        console.log("poppy!");
         if (typeof snapshot === "undefined" || !snapshot) {
-            console.log("need to get snapshot!");
             var playlist = models.Playlist.fromURI(localStorage.album_radio_playlist);
             playlist.load('tracks').done(function (tracks) {
                 playlist.tracks.snapshot(0, 500).done(function (s) {
@@ -115,6 +158,12 @@ require([
                         } else {
                            var image = Image.forAlbum(album, { width: 64, height: 64, title: album_title });
                         }
+                        var delete_button = document.createElement('div');
+                        delete_button.innerHTML = 'X';
+                        delete_button.classList.add('deleter');
+                        delete_button.title = 'Delete This Album';
+                        delete_button.onclick = deleteAlbum;
+                        image.node.appendChild(delete_button);
                         drop_box.appendChild(image.node);
                     });
                     if (snapshot.length >= 500) {

@@ -40,3 +40,16 @@ h1 {font-size:2em;}
 .hide {
     display:none;
 }
+
+/* Deleter Button */
+.deleter {
+    position: absolute;
+    top: 1px;
+    right: 1px;
+    padding: 4px;
+    background-color: rgba(136, 136, 136, 0.31);
+    font-weight: bold;
+    font-size: 11px;
+    z-index: 9999;
+    color: black;
+}
