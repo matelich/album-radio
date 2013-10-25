@@ -145,9 +145,7 @@ require([
             console.log("albums found: " + albums_array.length);
             if (joined_promises) {
                 joined_promises.always(function () {
-                    var first_album=true;
-                    var w=128;
-                    var h=128;
+                    var first_album=(index==0);
                     albums_array.forEach(function (album) {
                         var album_title = album.name + ' by ';
                         var first = true;

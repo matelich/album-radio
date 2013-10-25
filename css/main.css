@@ -47,9 +47,9 @@ h1 {font-size:2em;}
     top: 1px;
     right: 1px;
     padding: 4px;
-    background-color: rgba(136, 136, 136, 0.31);
+    background-color: rgba(189, 79, 79, 0.51);
     font-weight: bold;
     font-size: 11px;
     z-index: 9999;
-    color: black;
+    color: rgb(100, 0, 0);
 }
