@@ -7,6 +7,9 @@
     <Filter Include="js">
       <UniqueIdentifier>{b4f1151b-f6da-4d8b-80ef-1011600287ac}</UniqueIdentifier>
     </Filter>
+    <Filter Include="img">
+      <UniqueIdentifier>{aeb8ffff-7a2b-4db8-8434-003de8a2d967}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="manifest.json" />
@@ -36,5 +39,8 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="albumradio.png" />
+    <Image Include="img\starplus.png">
+      <Filter>img</Filter>
+    </Image>
   </ItemGroup>
 </Project>

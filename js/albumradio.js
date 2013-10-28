@@ -1,6 +1,6 @@
 require([
-    '$api/models', '$views/image#Image', '$views/throbber#Throbber'
-], function (models, Image, Throbber) {
+    '$api/models', '$api/library#Library', '$views/image#Image', '$views/throbber#Throbber'
+], function (models, Library, Image, Throbber) {
     "use strict";
     
     //REGION Handle drops, html style
@@ -66,6 +66,14 @@ require([
     //ENDREGION drag/drop
 
     //REGION utility funcs
+    function starPlus(e) {
+        var library = Library.forCurrentUser();
+        library.star(models.player.track).done(function () { console.log("Added current song to Starred"); });
+        var artists = [];
+        models.player.track.artists.forEach(function (a) { artists.push(a); });
+        addRandomArtistAlbum(artists);
+    }
+
     function deleteAlbum(e) {
         var playlist = models.Playlist.fromURI(localStorage.album_radio_playlist);
         playlist.load('tracks').done(function (tracks) {
@@ -153,7 +161,14 @@ require([
                         if(first_album) { 
                            first_album=false; 
                            var image = Image.forAlbum(album, { width: 192, height: 192, title: album_title });
-                        } else {
+
+                           var starplus_button = document.createElement('div');
+                           starplus_button.innerHTML = 'X';
+                           starplus_button.classList.add('starplusr');
+                           starplus_button.title = 'Star current song and add another album from this artist, if available';
+                           starplus_button.onclick = starPlus;
+                           image.node.appendChild(starplus_button);
+                       } else {
                            var image = Image.forAlbum(album, { width: 64, height: 64, title: album_title });
                         }
                         var delete_button = document.createElement('div');
@@ -162,7 +177,9 @@ require([
                         delete_button.title = 'Delete This Album';
                         delete_button.onclick = deleteAlbum;
                         image.node.appendChild(delete_button);
+
                         drop_box.appendChild(image.node);
+
                     });
                     if (snapshot.length >= 500) {
                         var playlist = models.Playlist.fromURI(localStorage.album_radio_playlist);
@@ -195,6 +212,51 @@ require([
         else
             console.log('found current song');
     }
+
+    function addRandomArtistAlbum(artists, playlist) {
+        if (typeof playlist === "undefined" || !playlist) {
+            playlist = models.Playlist.fromURI(localStorage.album_radio_playlist);
+        }
+        console.log(artists.length + " artists");
+        //pick a random artist from the list
+        var found_one = false;
+        //while(!found_one)
+        {
+            var rand = artists[Math.floor(Math.random() * artists.length)];
+            rand.load('albums', 'name').done(function (albums) {
+                rand.albums.snapshot().done(function (s) {
+                    s.loadAll().done(function (albums_snapshot) {
+                        function isPlayable(album) { return album.playable = true; }
+                        var albums = albums_snapshot.filter(isPlayable);
+                        var selected_album = albums[Math.floor(Math.random() * albums.length)].albums[0];
+                        selected_album.load('name', 'tracks').done(function () {
+                            //refresh the tracks
+                            //playlist.tracks.snapshot(0, 500).done(function (playlist_tracks) {
+                            //  console.log('snapshot reloaded');
+
+                            //});
+                            selected_album.tracks.filter('==', 'playable', 'true').snapshot().done(function (s) {
+                                s.loadAll().done(function (tracks_to_append) {
+                                    playlist.tracks.add(tracks_to_append)
+                                        .done(function () {
+                                            console.log("appended songs");
+                                            var debug_message = document.createElement('p');
+                                            debug_message.innerHTML = 'Added ' + tracks_to_append.length + ' songs to playlist from ' + rand.name + '\'s album ' + selected_album.name;
+                                            debug_box.appendChild(debug_message);
+                                            debug_box.scrollTop = debug_box.scrollHeight;
+                                            populateAlbumsBox();
+                                        })
+                                        .fail(function (blah, err) { console.log("failed to append " + err.message); });
+                                });
+                            });
+                        }).fail(function (blah, err) { console.log(err.message); });
+                        found_one = true;
+                    });
+                });
+            });
+        }
+    }
+
     //ENDREGION
 
     //REGION initial setup
@@ -282,45 +344,8 @@ require([
                                     artists[0].related.snapshot().done(function (related_artists_snapshot) {
                                         var related_artists = related_artists_snapshot.toArray();
                                         related_artists.forEach(function (rel) { artists.push(rel); });
-                                        console.log(artists.length + " artists");
                                         //TODO: add starred and subscribed artists
-                                        //pick a random artist from the list
-                                        var found_one = false;
-                                        //while(!found_one)
-                                        {
-                                            var rand = artists[Math.floor(Math.random() * artists.length)];
-                                            rand.load('albums', 'name').done(function (albums) {
-                                                rand.albums.snapshot().done(function (s) {
-                                                    s.loadAll().done(function (albums_snapshot) {
-                                                        function isPlayable(album) { return album.playable = true; }
-                                                        var albums = albums_snapshot.filter(isPlayable);
-                                                        var selected_album = albums[Math.floor(Math.random() * albums.length)].albums[0];
-                                                        selected_album.load('name', 'tracks').done(function () {
-                                                            //refresh the tracks
-                                                            //playlist.tracks.snapshot(0, 500).done(function (playlist_tracks) {
-                                                              //  console.log('snapshot reloaded');
-
-                                                            //});
-                                                            selected_album.tracks.filter('==', 'playable', 'true').snapshot().done(function (s) {
-                                                                s.loadAll().done(function (tracks_to_append) {
-                                                                    playlist.tracks.add(tracks_to_append)
-                                                                        .done(function () {
-                                                                            console.log("appended songs");
-                                                                            var debug_message = document.createElement('p');
-                                                                            debug_message.innerHTML = 'Added ' + tracks_to_append.length + ' songs to playlist from ' + rand.name + '\'s album ' + selected_album.name;
-                                                                            debug_box.appendChild(debug_message);
-                                                                            debug_box.scrollTop = debug_box.scrollHeight;
-                                                                            populateAlbumsBox();
-                                                                        })
-                                                                        .fail(function (blah, err) { console.log("failed to append " + err.message); });
-                                                                });
-                                                            });
-                                                        }).fail(function (blah, err) { console.log(err.message); });
-                                                        found_one = true;
-                                                    });
-                                                });
-                                            });
-                                        }
+                                        addRandomArtistAlbum(artists);
                                     });
                                 });
                             } else {
