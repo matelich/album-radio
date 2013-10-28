@@ -4,7 +4,8 @@
 	},
 	"AppIcon": {
 		"36x18": "albumradio.png",
-		"32x32": "albumradio32.png"
+		"32x32": "albumradio32.png",
+		"64x64": "albumradio64.png"
 	},
 	"AppName": {
 		"en": "Album Radio"

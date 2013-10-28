@@ -43,5 +43,6 @@
       <Filter>img</Filter>
     </Image>
     <Image Include="albumradio32.png" />
+    <Image Include="albumradio64.png" />
   </ItemGroup>
 </Project>

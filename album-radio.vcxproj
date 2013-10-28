@@ -94,6 +94,7 @@
   <ItemGroup>
     <Image Include="albumradio.png" />
     <Image Include="albumradio32.png" />
+    <Image Include="albumradio64.png" />
     <Image Include="img\starplus.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
