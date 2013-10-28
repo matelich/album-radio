@@ -3,7 +3,8 @@
 		"en": "Album Radio - explore related artists with the full album experience"
 	},
 	"AppIcon": {
-		"36x18": "albumradio.png"
+		"36x18": "albumradio.png",
+		"32x32": "albumradio32.png"
 	},
 	"AppName": {
 		"en": "Album Radio"

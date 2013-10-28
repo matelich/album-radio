@@ -42,5 +42,6 @@
     <Image Include="img\starplus.png">
       <Filter>img</Filter>
     </Image>
+    <Image Include="albumradio32.png" />
   </ItemGroup>
 </Project>
