@@ -76,14 +76,19 @@ require([
 
     function deleteAlbum(e) {
         var playlist = models.Playlist.fromURI(localStorage.album_radio_playlist);
-        playlist.load('tracks').done(function (tracks) {
-            playlist.tracks.snapshot(0, 20).done(function (s) {
-                s.loadAll('album').done(function (sn) { deleteAlbumTracks(playlist, e.target.parentNode.getAttribute('data-uri'), s, sn, 0); });
+        models.player.track.load('album').done(function() {
+            var album_uri = e.target.parentNode.getAttribute('data-uri');
+            var next_track = (album_uri == models.player.track.album.uri);
+
+            playlist.load('tracks').done(function (tracks) {
+                playlist.tracks.snapshot(0, 20).done(function (s) {
+                    s.loadAll('album').done(function (sn) { deleteAlbumTracks(playlist, album_uri, next_track, s, sn, 0); });
+                });
             });
         });
     }
 
-    function deleteAlbumTracks(playlist, album_uri, snappy, snap_tracks, start_index) {
+    function deleteAlbumTracks(playlist, album_uri, next_track, snappy, snap_tracks, start_index) {
         if (snap_tracks.length == 0) { return; }
 
         for (var i = 0; i < snap_tracks.length; i++) {
@@ -91,7 +96,7 @@ require([
             {
                 if (i == snap_tracks.length - 1 && snap_tracks.length != 1) { //we need to have the song after the one we're deleting, so just get the next snap with this one included
                     playlist.tracks.snapshot(start_index + i, 20).done(function (s) {
-                        s.loadAll('album').done(function (sn) { deleteAlbumTracks(playlist, album_uri, s, sn, start_index + i); });
+                        s.loadAll('album').done(function (sn) { deleteAlbumTracks(playlist, album_uri, next_track, s, sn, start_index + i); });
                     });
                 } else {
                     var done_with_album = (snap_tracks.length == 1 || (snap_tracks[i].album != snap_tracks[i + 1].album));
@@ -103,10 +108,13 @@ require([
                         console.log('deleted a song from album');
                         if (done_with_album) {
                             populateAlbumsBox();
+                            if (next_track) {
+                                models.player.skipToNextTrack();
+                            }
                             return;
                         }
                         playlist.tracks.snapshot(start_index + i, 20).done(function (s) {
-                            s.loadAll('album').done(function (sn) { deleteAlbumTracks(playlist, album_uri, s, sn, start_index + i); });
+                            s.loadAll('album').done(function (sn) { deleteAlbumTracks(playlist, album_uri, next_track, s, sn, start_index + i); });
                         });
                     }).fail(function (blah, err) { console.log("failed to delete song " + err.message); });
                 }
@@ -114,7 +122,7 @@ require([
             }
         }
         playlist.tracks.snapshot(start_index + snap_tracks.length, 20).done(function (s) {
-            s.loadAll('album').done(function (sn) { deleteAlbumTracks(playlist, album_uri, s, sn, start_index + i); });
+            s.loadAll('album').done(function (sn) { deleteAlbumTracks(playlist, album_uri, next_track, s, sn, start_index + i); });
         });
     }
 
@@ -264,8 +272,6 @@ require([
                 playlist.tracks.snapshot(0, 1).done(function (sn) { deletePlayed(playlist, sn); });
             });
         }
-        else
-            console.log('found current song');
     }
 
     function addRandomArtistAlbum(artists, playlist, playlist_albums, call_count) {
