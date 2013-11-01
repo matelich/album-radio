@@ -118,6 +118,60 @@ require([
         });
     }
 
+    //only pass callback to this
+    function getPlaylistAlbums(callback, snapshot, index, last_loaded_uri) {
+        if (typeof snapshot === "undefined" || !snapshot) {
+            var playlist = models.Playlist.fromURI(localStorage.album_radio_playlist);
+            playlist.load('tracks').done(function (tracks) {
+                playlist.tracks.snapshot(0, 500).done(function (s) {
+                    s.loadAll('album').done(function (playlist_tracks) {
+                        getPlaylistAlbums(callback, playlist_tracks, 0);
+                    });
+                });
+            });
+        } else {
+            if (index == 0) {
+            }
+            var albums_array = []; //huh, this is totz broken.  being saved by the snapshot keeping all the stuff from the last snapshot
+            var trigger_promise = new models.Promise();
+            var joined_promises = null;
+            for (var i = 0; i < snapshot.length; i++) {
+                var album = snapshot[i].album;
+                if (albums_array.indexOf(album) == -1 && (index == 0 || album.uri != last_loaded_uri)) {
+                    albums_array.push(album);
+                    var load_promise = album.load('name', 'artists');
+                    if (joined_promises == null) {
+                        joined_promises = models.Promise.join(trigger_promise, load_promise);
+                    } else {
+                        joined_promises = models.Promise.join(joined_promises, load_promise);
+                    }
+                }
+            }
+            trigger_promise.setDone();
+            console.log("albums found: " + albums_array.length);
+            if (joined_promises) {
+                joined_promises.always(function () {
+                    if (snapshot.length >= 500) {
+                        var playlist = models.Playlist.fromURI(localStorage.album_radio_playlist);
+                        playlist.load('tracks').done(function (tracks) {
+                            playlist.tracks.snapshot(500 * (index + 1), 500).done(function (s) {
+                                console.log('load extra songs: ' + s.length);
+                                s.loadAll('album').done(function (playlist_tracks) {
+                                    getPlaylistAlbums(callback, playlist_tracks, index + 1, albums_array[albums_array.length - 1].uri);
+                                });
+                            });
+                        });
+                    } else {
+                        callback(albums_array);
+                    }
+                });
+            }
+            else {
+                callback(albums_array);
+            }
+        }
+    }
+
     //don't pass stuff in to this, let it handle the params itself
     function populateAlbumsBox(snapshot, index, last_loaded_uri) {
         if (typeof snapshot === "undefined" || !snapshot) {
@@ -153,23 +207,23 @@ require([
             console.log("albums found: " + albums_array.length);
             if (joined_promises) {
                 joined_promises.always(function () {
-                    var first_album=(index==0);
+                    var first_album = (index == 0);
                     albums_array.forEach(function (album) {
                         var album_title = album.name + ' by ';
                         var first = true;
                         album.artists.forEach(function (a) { if (!first) { album_title += ', '; } first = false; album_title += a.name; });
-                        if(first_album) { 
-                           first_album=false; 
-                           var image = Image.forAlbum(album, { width: 192, height: 192, title: album_title });
+                        if (first_album) {
+                            first_album = false;
+                            var image = Image.forAlbum(album, { width: 192, height: 192, title: album_title });
 
-                           var starplus_button = document.createElement('div');
-                           starplus_button.innerHTML = 'X';
-                           starplus_button.classList.add('starplusr');
-                           starplus_button.title = 'Star current song and add another album from this artist, if available';
-                           starplus_button.onclick = starPlus;
-                           image.node.appendChild(starplus_button);
-                       } else {
-                           var image = Image.forAlbum(album, { width: 64, height: 64, title: album_title });
+                            var starplus_button = document.createElement('div');
+                            starplus_button.innerHTML = 'X';
+                            starplus_button.classList.add('starplusr');
+                            starplus_button.title = 'Star current song and add another album from this artist, if available';
+                            starplus_button.onclick = starPlus;
+                            image.node.appendChild(starplus_button);
+                        } else {
+                            var image = Image.forAlbum(album, { width: 64, height: 64, title: album_title });
                         }
                         var delete_button = document.createElement('div');
                         delete_button.innerHTML = 'X';
@@ -195,8 +249,9 @@ require([
                     throbber.hide();
                 });
             }
-            else
+            else {
                 throbber.hide();
+            }
         }
     }
 
@@ -213,11 +268,23 @@ require([
             console.log('found current song');
     }
 
-    function addRandomArtistAlbum(artists, playlist) {
+    function addRandomArtistAlbum(artists, playlist, playlist_albums, call_count) {
         if (typeof playlist === "undefined" || !playlist) {
             playlist = models.Playlist.fromURI(localStorage.album_radio_playlist);
         }
-        console.log(artists.length + " artists");
+        if (typeof playlist_albums === "undefined" || !playlist_albums) {
+            getPlaylistAlbums(function (albums) { addRandomArtistAlbum(artists, playlist, albums); });
+            return;
+        }
+        if (typeof call_count === "undefined" || !call_count) {
+            call_count = 1;
+        } else {
+            if(call_count > 5) { 
+                console.log("giving up on adding album, too many dups");
+                return;
+            }
+        }
+        console.log(playlist_albums.length + " albums already in playlist");
         //pick a random artist from the list
         var found_one = false;
         //while(!found_one)
@@ -229,6 +296,12 @@ require([
                         function isPlayable(album) { return album.playable = true; }
                         var albums = albums_snapshot.filter(isPlayable);
                         var selected_album = albums[Math.floor(Math.random() * albums.length)].albums[0];
+                        if (playlist_albums.indexOf(selected_album) != -1)
+                        {
+                            console.log("skipping album because it's already present");
+                            addRandomArtistAlbum(artists, playlist, playlist_albums, call_count+1);
+                            return;
+                        }
                         selected_album.load('name', 'tracks').done(function () {
                             //refresh the tracks
                             //playlist.tracks.snapshot(0, 500).done(function (playlist_tracks) {
@@ -237,6 +310,11 @@ require([
                             //});
                             selected_album.tracks.filter('==', 'playable', 'true').snapshot().done(function (s) {
                                 s.loadAll().done(function (tracks_to_append) {
+                                    if (tracks_to_append.length < 3) {
+                                        console.log("skipping album because it's too short");
+                                        addRandomArtistAlbum(artists, playlist, playlist_albums, call_count + 1);
+                                        return;
+                                    }
                                     playlist.tracks.add(tracks_to_append)
                                         .done(function () {
                                             console.log("appended songs");
@@ -292,8 +370,16 @@ require([
     });
     //ENDREGION html tomfoolery
 
-    models.player.addEventListener('change:track', function () {
+    /*models.player.addEventListener('change', function (e) {
+        console.log(e);
+        console.log(e.data.duration); //this seems to indicate skipped, if 0
+        console.log(e.data.track.uri);
+        console.log(e.target.track);
+    });*/
+
+    models.player.addEventListener('change:track', function (e) {
         if (localStorage.album_radio_playlist) {
+            //console.log(e);
             var debug_box = document.querySelector('#debugging');
             if (models.player.context && models.player.context.uri.substr(-22) == localStorage.album_radio_playlist.substr(-22)) {
                 console.log('Played a song from your playlist - trimming start of playlist');
@@ -303,35 +389,6 @@ require([
                     playlist.tracks.snapshot(0,500).done(function (playlist_tracks) {
                         console.log('snapshot loaded');
                         if (playlist_tracks.find(models.player.track)) {
-                            var done=false;
-/*
-                            var tracks = playlist_tracks.toArray();
-                            var num_deleted = 0;
-                            var trigger_promise = new models.Promise();
-                            var joined_promises = null;
-                            var i = 0;
-                            tracks.forEach(function (deleteme) {
-                                if (deleteme == models.player.track) {
-                                    console.log('here\'s our current track');
-                                    done = true;
-                                } else if (done) {
-                                    //console.log('already done');
-                                } else {
-                                    num_deleted++;
-                                    console.log('deleting ' + deleteme.uri);
-                                    try {
-                                        var remove_promise = playlist.tracks.remove(playlist_tracks.ref(i));
-                                        if(joined_promises == null) {
-                                            joined_promises = models.Promise.join(trigger_promise, remove_promise);
-                                        } else {
-                                            joined_promises = models.Promise.join(joined_promises, remove_promise);
-                                        }
-                                    } catch (err) { console.log("poo " + err); }
-                                }
-                                i++;
-                            });
-                            trigger_promise.setDone();
-*/
                             playlist.tracks.snapshot(0, 1).done(function (sn) { deletePlayed(playlist, sn); });
                             //console.log(playlist_tracks.length - num_deleted);
                             if (playlist_tracks.length/*-num_deleted*/ < 500) {
