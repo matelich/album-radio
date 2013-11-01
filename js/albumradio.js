@@ -321,7 +321,8 @@ require([
                                             var debug_message = document.createElement('p');
                                             debug_message.innerHTML = 'Added ' + tracks_to_append.length + ' songs to playlist from ' + rand.name + '\'s album ' + selected_album.name;
                                             debug_box.appendChild(debug_message);
-                                            debug_box.scrollTop = debug_box.scrollHeight;
+                                            if (debug_box.children.length > 4)
+                                                debug_box.removeChild(debug_box.children[0]);
                                             populateAlbumsBox();
                                         })
                                         .fail(function (blah, err) { console.log("failed to append " + err.message); });
@@ -343,6 +344,8 @@ require([
         var debug_message = document.createElement('p');
         debug_message.innerHTML = 'You have a playlist stored in localstorage: ' + localStorage.album_radio_playlist + " - " + new Date().toUTCString();
         debug_box.appendChild(debug_message);
+        if (debug_box.children.length > 4)
+            debug_box.removeChild(debug_box.children[0]);
         populateAlbumsBox();
     }
     // find out initial status of the player

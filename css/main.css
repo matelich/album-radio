@@ -26,11 +26,11 @@ h1 {font-size:2em;}
 .sp-image { float:left; }
 
 /* Drop Box */
-#drop_box {border:4px dashed #333;width:95%;height:320px;padding:10px; overflow-y:auto;}
+#drop_box {border:4px dashed #333;padding:10px; overflow-y:auto; min-height:148px; }
 #drop_box.over {opacity:0.8;border-color:#74c043;}
 
 /* Debug box*/
-#debugging {border:4px dashed #333;width:95%;height:200px;padding:10px; overflow-y:auto;}
+#debugging {border:4px dashed #333;padding:5px; overflow-y:auto;}
 
 /* Index */
 #index h1, #index ul {margin:0 0 30px;}
