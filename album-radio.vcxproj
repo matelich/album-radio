@@ -79,7 +79,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="index.html" />
-    <None Include="css\github.css" />
     <None Include="css\main.css" />
     <None Include="oldindex.html" />
     <None Include="js\albumradio.js" />

@@ -14,9 +14,6 @@
   <ItemGroup>
     <None Include="manifest.json" />
     <None Include="tabs.html" />
-    <None Include="css\github.css">
-      <Filter>css</Filter>
-    </None>
     <None Include="css\main.css">
       <Filter>css</Filter>
     </None>

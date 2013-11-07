@@ -1,8 +1,10 @@
 require([
     '$api/models', '$api/library#Library', '$views/image#Image', '$views/throbber#Throbber'
-], function (models, Library, Image, Throbber) {
+      //,'$api/toplists#Toplist'
+      , '$api/audio'
+], function (models, Library, Image, Throbber/*, Toplist*/, audio) {
     "use strict";
-    
+
     //REGION Handle drops, html style
     var drop_box = document.querySelector('#drop_box');
 
@@ -53,16 +55,16 @@ require([
             });
         });
     }, false);
-    
 
-/* Not using this because dropping a playlist just causes that playlist to be loaded
-    models.application.addEventListener('dropped', function () {
-        console.log('hola!');
-        var dropped = models.application.dropped; // it contains the dropped elements
-        console.log(dropped.length);
-        console.log(JSON.stringify(dropped));
-    });
-*/
+
+    /* Not using this because dropping a playlist just causes that playlist to be loaded
+        models.application.addEventListener('dropped', function () {
+            console.log('hola!');
+            var dropped = models.application.dropped; // it contains the dropped elements
+            console.log(dropped.length);
+            console.log(JSON.stringify(dropped));
+        });
+    */
     //ENDREGION drag/drop
 
     //REGION utility funcs
@@ -76,7 +78,7 @@ require([
 
     function deleteAlbum(e) {
         var playlist = models.Playlist.fromURI(localStorage.album_radio_playlist);
-        models.player.track.load('album').done(function() {
+        models.player.track.load('album').done(function () {
             var album_uri = e.target.parentNode.getAttribute('data-uri');
             var next_track = (album_uri == models.player.track.album.uri);
 
@@ -268,7 +270,7 @@ require([
             var reload = (snapshot.toArray()[0].album != models.player.track.album);
             playlist.tracks.remove(snapshot.ref(0)).done(function () {
                 console.log('deleted a song');
-                if(reload) { populateAlbumsBox(); }
+                if (reload) { populateAlbumsBox(); }
                 playlist.tracks.snapshot(0, 1).done(function (sn) { deletePlayed(playlist, sn); });
             });
         }
@@ -285,7 +287,7 @@ require([
         if (typeof call_count === "undefined" || !call_count) {
             call_count = 1;
         } else {
-            if(call_count > 5) { 
+            if (call_count > 5) {
                 console.log("giving up on adding album, too many dups");
                 return;
             }
@@ -302,10 +304,9 @@ require([
                         function isPlayable(album) { return album.playable = true; }
                         var albums = albums_snapshot.filter(isPlayable);
                         var selected_album = albums[Math.floor(Math.random() * albums.length)].albums[0];
-                        if (playlist_albums.indexOf(selected_album) != -1)
-                        {
+                        if (playlist_albums.indexOf(selected_album) != -1) {
                             console.log("skipping album because it's already present");
-                            addRandomArtistAlbum(artists, playlist, playlist_albums, call_count+1);
+                            addRandomArtistAlbum(artists, playlist, playlist_albums, call_count + 1);
                             return;
                         }
                         selected_album.load('name', 'tracks').done(function () {
@@ -395,7 +396,7 @@ require([
                 var playlist = models.Playlist.fromURI(localStorage.album_radio_playlist);
                 playlist.load('tracks').done(function (tracks) {
                     console.log('tracks loaded');
-                    playlist.tracks.snapshot(0,500).done(function (playlist_tracks) {
+                    playlist.tracks.snapshot(0, 500).done(function (playlist_tracks) {
                         console.log('snapshot loaded');
                         if (playlist_tracks.find(models.player.track)) {
                             playlist.tracks.snapshot(0, 1).done(function (sn) { deletePlayed(playlist, sn); });
@@ -403,7 +404,7 @@ require([
                             if (playlist_tracks.length/*-num_deleted*/ < 500) {
                                 //add an album
                                 var artists = [];
-                                models.player.track.artists.forEach(function(a) { artists.push(a); });
+                                models.player.track.artists.forEach(function (a) { artists.push(a); });
                                 //models.Promise.join(joined_promises, artists[0].load('related')).always(function (related) {
                                 artists[0].load('related').done(function (related) {
                                     console.log('yo');
@@ -422,6 +423,81 @@ require([
                 });
             }
         }
-    });    
+    });
+
+    /* from  http://stackoverflow.com/questions/19761821/return-top-track-spotify-api
+    keeping around for future toplist access
+    function doGetTopTrack(artist, num, callback) {
+        var artistTopList = Toplist.forArtist(artist);
+
+        artistTopList.tracks.snapshot(0,num).done(function (snapshot) { //only get the number of tracks we need
+
+            snapshot.loadAll('name').done(function (tracks) {
+                var i, num_toptracks;
+                num_toptracks = num; //this probably should be minimum of num and tracks.length
+
+                for (i = 0; i < num_toptracks; i++) {
+                    callback(artist, tracks[i]);
+                }
+            });
+        });
+    };
+
+    function showRelated() {
+        var artist_properties = ['name', 'popularity', 'related', 'uri'];
+
+        models.Artist
+          .fromURI('spotify:artist:11FY888Qctoy6YueCpFkXT')
+          .load(artist_properties)
+          .done(function (artist) {
+
+              artist.related.snapshot().done(function (snapshot) {
+                  snapshot.loadAll('name').done(function (artists) {
+
+                      for (var i = 0; i < artists.length; i++) {
+                          // am I missing something here?
+                          doGetTopTrack(artists[i], 1, function (artist, toptrack) {
+                                  console.log("top track: " + toptrack.name);
+
+                                  // store artist details
+                                  var p = artist.popularity;
+                                  var n = artist.name;
+                                  var u = artist.uri;
+
+                                  //listItem = document.createElement("li");
+                                  console.log("<strong>Name</strong>: " + n.decodeForText() + " | <strong>Popularity: </strong> " + p + " | <strong>Top Track: </strong>" + toptrack.name);
+
+                                  //// undefined name
+                                  //$('#artistsContainer').append(listItem);
+                          });
+                      }
+                  });
+
+              });
+          });
+    };
+    showRelated();
+    */
+
 }
-)
+);
+
+
+/* for http://stackoverflow.com/questions/19763090/spotify-app-fire-function-on-change-position
+
+require(['$api/audio', '$api/models', '$views/utils/frame#throttle'], function (audio, models, throttle) {
+    var analyzer = audio.RealtimeAnalyzer.forPlayer(models.player);
+    console.log('peep');
+
+    var last_position = -1;
+    analyzer.addEventListener('audio', function (evt) {
+        models.player.load('position').done(function() {
+            if(models.player.position != last_position) { 
+                console.log(models.player.position + ", " + (models.player.position-last_position)); 
+                last_position = models.player.position;
+            }
+        });
+    });
+    console.log('peep');
+});*/
+
