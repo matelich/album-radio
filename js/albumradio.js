@@ -227,7 +227,6 @@ require([
                             var image = Image.forAlbum(album, { width: 192, height: 192, title: album_title });
 
                             var starplus_button = document.createElement('div');
-                            starplus_button.innerHTML = 'X';
                             starplus_button.classList.add('starplusr');
                             starplus_button.title = 'Star current song and add another album from this artist, if available';
                             starplus_button.onclick = starPlus;
@@ -236,7 +235,6 @@ require([
                             var image = Image.forAlbum(album, { width: 64, height: 64, title: album_title });
                         }
                         var delete_button = document.createElement('div');
-                        delete_button.innerHTML = 'X';
                         delete_button.classList.add('deleter');
                         delete_button.title = 'Delete This Album';
                         delete_button.onclick = deleteAlbum;

@@ -41,5 +41,8 @@
     </Image>
     <Image Include="albumradio32.png" />
     <Image Include="albumradio64.png" />
+    <Image Include="img\remove.png">
+      <Filter>img</Filter>
+    </Image>
   </ItemGroup>
 </Project>
