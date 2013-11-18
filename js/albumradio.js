@@ -224,7 +224,7 @@ require([
                         album.artists.forEach(function (a) { if (!first) { album_title += ', '; } first = false; album_title += a.name; });
                         if (first_album) {
                             first_album = false;
-                            var image = Image.forAlbum(album, { width: 192, height: 192, title: album_title });
+                            var image = Image.forAlbum(album, { width: 320, height: 320, title: album_title });
 
                             var starplus_button = document.createElement('div');
                             starplus_button.classList.add('starplusr');
