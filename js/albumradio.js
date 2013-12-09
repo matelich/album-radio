@@ -499,3 +499,20 @@ require(['$api/audio', '$api/models', '$views/utils/frame#throttle'], function (
     console.log('peep');
 });*/
 
+/* for http://stackoverflow.com/questions/20440664/incorrect-snapshot-length-returned-for-a-specific-playlist
+require(['$api/models'], function(models) {
+    var playlist = models.Playlist.fromURI("spotify:user:juan20150:playlist:5rl5QaWjWtEPv9a057w3qc");
+    playlist.load('tracks').done(function() {
+
+        playlist.tracks.snapshot().done(function(snapshot) {
+            console.log("snapshot length " + snapshot.length);
+            var i=0;
+            snapshot.loadAll('name')
+                //.each(function(t) { console.log(i++); })
+               .done(function(snap_tracks) { console.log("loaded tracks length " + snap_tracks.length); })
+               .fail(function(track, error) { console.log(error + ". " + track.length); });
+        });
+
+    });
+});
+*/
