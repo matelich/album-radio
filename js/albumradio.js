@@ -1,8 +1,8 @@
 require([
-    '$api/models', '$api/library#Library', '$views/image#Image', '$views/throbber#Throbber'
+    '$api/models', '$api/library#Library', '$api/relations#Relations', '$views/image#Image', '$views/throbber#Throbber'
       //,'$api/toplists#Toplist'
       , '$api/audio'
-], function (models, Library, Image, Throbber/*, Toplist*/, audio) {
+], function (models, Library, Relations, Image, Throbber/*, Toplist*/, audio) {
     "use strict";
 
     //REGION Handle drops, html style
@@ -43,6 +43,9 @@ require([
                     var allowed_message = document.createElement('p');
                     allowed_message.innerHTML = 'You are the owner of this playlist, let\'s get to work!';
                     drop_box.appendChild(allowed_message);
+                    setTimeout(function () {
+                        allowed_message.remove();
+                    }, 5000);
                     localStorage.album_radio_playlist = drop.uri;
                     populateAlbumsBox();
                 }
@@ -74,6 +77,8 @@ require([
         var artists = [];
         models.player.track.artists.forEach(function (a) { artists.push(a); });
         addRandomArtistAlbum(artists);
+        var rels = Relations.forCurrentUser();
+        rels.subscribe(artists[0]);
     }
 
     function deleteAlbum(e) {
@@ -129,22 +134,21 @@ require([
     }
 
     //only pass callback to this
-    function getPlaylistAlbums(callback, snapshot, index, last_loaded_uri) {
+    function getPlaylistAlbums(callback, snapshot, index, albums_array, last_loaded_uri) {
         if (typeof snapshot === "undefined" || !snapshot) {
             var playlist = models.Playlist.fromURI(localStorage.album_radio_playlist);
             playlist.load('tracks').done(function (tracks) {
                 playlist.tracks.snapshot(0, 500).done(function (s) {
                     s.loadAll('album').done(function (playlist_tracks) {
-                        getPlaylistAlbums(callback, playlist_tracks, 0);
+                        var foo = [];
+                        getPlaylistAlbums(callback, playlist_tracks, 0, foo);
                     });
                 });
             });
         } else {
-            if (index == 0) {
-            }
-            var albums_array = []; //huh, this is totz broken.  being saved by the snapshot keeping all the stuff from the last snapshot
             var trigger_promise = new models.Promise();
             var joined_promises = null;
+            console.log("snapshot length: " + snapshot.length);
             for (var i = 0; i < snapshot.length; i++) {
                 var album = snapshot[i].album;
                 if (albums_array.indexOf(album) == -1 && (index == 0 || album.uri != last_loaded_uri)) {
@@ -167,7 +171,7 @@ require([
                             playlist.tracks.snapshot(500 * (index + 1), 500).done(function (s) {
                                 console.log('load extra songs: ' + s.length);
                                 s.loadAll('album').done(function (playlist_tracks) {
-                                    getPlaylistAlbums(callback, playlist_tracks, index + 1, albums_array[albums_array.length - 1].uri);
+                                    getPlaylistAlbums(callback, playlist_tracks, index + 1, albums_array, albums_array[albums_array.length - 1].uri);
                                 });
                             });
                         });
@@ -195,9 +199,9 @@ require([
             });
         } else {
             if (index == 0) {
-                drop_box.innerHTML = '';
+                album_box.innerHTML = '';
             }
-            var throbber = Throbber.forElement(drop_box);
+            var throbber = Throbber.forElement(album_box);
             var albums_array = [];
             var trigger_promise = new models.Promise();
             var joined_promises = null;
@@ -228,7 +232,7 @@ require([
 
                             var starplus_button = document.createElement('div');
                             starplus_button.classList.add('starplusr');
-                            starplus_button.title = 'Star current song and add another album from this artist, if available';
+                            starplus_button.title = 'Star current song, follow artist, and add another album from this artist, if available';
                             starplus_button.onclick = starPlus;
                             image.node.appendChild(starplus_button);
                         } else {
@@ -240,7 +244,7 @@ require([
                         delete_button.onclick = deleteAlbum;
                         image.node.appendChild(delete_button);
 
-                        drop_box.appendChild(image.node);
+                        album_box.appendChild(image.node);
 
                     });
                     if (snapshot.length >= 500) {
@@ -351,6 +355,12 @@ require([
         debug_box.appendChild(debug_message);
         if (debug_box.children.length > 4)
             debug_box.removeChild(debug_box.children[0]);
+        var allowed_message = document.createElement('p');
+        allowed_message.innerHTML = 'Working with previously stored playlist';
+        drop_box.appendChild(allowed_message);
+        setTimeout(function () {
+            allowed_message.remove();
+        }, 5000);
         populateAlbumsBox();
     }
     // find out initial status of the player
@@ -383,7 +393,7 @@ require([
         console.log(e.data.duration); //this seems to indicate skipped, if 0
         console.log(e.data.track.uri);
         console.log(e.target.track);
-    });*/
+    });*/	
 
     models.player.addEventListener('change:track', function (e) {
         if (localStorage.album_radio_playlist) {
