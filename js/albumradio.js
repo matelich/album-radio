@@ -53,6 +53,9 @@ require([
                     var disallowed_message = document.createElement('p');
                     disallowed_message.innerHTML = 'You are not the owner of this playlist, choose a different one please!';
                     drop_box.appendChild(disallowed_message);
+                    setTimeout(function () {
+                        disallowed_message.remove();
+                    }, 5000);
                     localStorage.album_radio_playlist = null;
                 }
             });
@@ -190,7 +193,9 @@ require([
     function populateAlbumsBox(snapshot, index, last_loaded_uri) {
         if (typeof snapshot === "undefined" || !snapshot) {
             var playlist = models.Playlist.fromURI(localStorage.album_radio_playlist);
-            playlist.load('tracks').done(function (tracks) {
+            playlist.load('tracks', 'name').done(function (tracks) {
+                var playlist_name = document.querySelector('#playlist_name');
+                playlist_name.innerHTML = playlist.name;
                 playlist.tracks.snapshot(0, 500).done(function (s) {
                     s.loadAll('album').done(function (playlist_tracks) {
                         populateAlbumsBox(playlist_tracks, 0);
@@ -247,17 +252,26 @@ require([
                         album_box.appendChild(image.node);
 
                     });
-                    if (snapshot.length >= 500) {
+                    if (snapshot.length >= 500*(index+1)) {
                         var playlist = models.Playlist.fromURI(localStorage.album_radio_playlist);
                         playlist.load('tracks').done(function (tracks) {
                             playlist.tracks.snapshot(500 * (index + 1), 500).done(function (s) {
                                 console.log('load extra songs: ' + s.length);
+                                var playlist_count = document.querySelector('#playlist_count');
+                                localStorage.str_num_playlist_songs = s.length;
+                                playlist_count.innerHTML = s.length + ' tracks';
                                 s.loadAll('album').done(function (playlist_tracks) {
                                     populateAlbumsBox(playlist_tracks, index + 1, albums_array[albums_array.length - 1].uri);
                                 });
                             });
                         });
+                    } else {
+                        var playlist_count = document.querySelector('#playlist_count');
+                        localStorage.str_num_playlist_songs = (500 * index + snapshot.length);
+                        console.log("num playlist songs: " + localStorage.str_num_playlist_songs + " = (500 * " + index + " + " + snapshot.length);
+                        playlist_count.innerHTML = localStorage.str_num_playlist_songs + ' tracks';
                     }
+
                     throbber.hide();
                 });
             }
@@ -273,6 +287,13 @@ require([
             playlist.tracks.remove(snapshot.ref(0)).done(function () {
                 console.log('deleted a song');
                 if (reload) { populateAlbumsBox(); }
+                else {
+                    var playlist_count = document.querySelector('#playlist_count');
+                    var num_songs = parseInt(localStorage.str_num_playlist_songs) - 1;
+                    console.log("var " + num_songs + " = parseInt(" + localStorage.str_num_playlist_songs + ") - 1");
+                    localStorage.str_num_playlist_songs = num_songs;
+                    playlist_count.innerHTML = localStorage.str_num_playlist_songs + ' tracks';
+                }
                 playlist.tracks.snapshot(0, 1).done(function (sn) { deletePlayed(playlist, sn); });
             });
         }
@@ -332,6 +353,11 @@ require([
                                             debug_box.appendChild(debug_message);
                                             if (debug_box.children.length > 4)
                                                 debug_box.removeChild(debug_box.children[0]);
+                                            var playlist_count = document.querySelector('#playlist_count');
+                                            var num_songs = parseInt(localStorage.str_num_playlist_songs) + tracks_to_append.length;
+                                            console.log("var " + num_songs + " = parseInt(" + localStorage.str_num_playlist_songs + ") +" + tracks_to_append.length);
+                                            localStorage.str_num_playlist_songs = num_songs;
+                                            playlist_count.innerHTML = num_songs + ' tracks';
                                             populateAlbumsBox();
                                         })
                                         .fail(function (blah, err) { console.log("failed to append " + err.message); });
@@ -526,3 +552,4 @@ require(['$api/models'], function(models) {
     });
 });
 */
+
