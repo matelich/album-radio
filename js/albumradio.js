@@ -290,7 +290,6 @@ require([
                 else {
                     var playlist_count = document.querySelector('#playlist_count');
                     var num_songs = parseInt(localStorage.str_num_playlist_songs) - 1;
-                    console.log("var " + num_songs + " = parseInt(" + localStorage.str_num_playlist_songs + ") - 1");
                     localStorage.str_num_playlist_songs = num_songs;
                     playlist_count.innerHTML = localStorage.str_num_playlist_songs + ' tracks';
                 }
@@ -315,7 +314,7 @@ require([
                 return;
             }
         }
-        console.log(playlist_albums.length + " albums already in playlist");
+        console.log(playlist_albums.length + " albums already in playlist. Picking from this many artists: " + artists.length);
         //pick a random artist from the list
         var found_one = false;
         //while(!found_one)
@@ -355,7 +354,6 @@ require([
                                                 debug_box.removeChild(debug_box.children[0]);
                                             var playlist_count = document.querySelector('#playlist_count');
                                             var num_songs = parseInt(localStorage.str_num_playlist_songs) + tracks_to_append.length;
-                                            console.log("var " + num_songs + " = parseInt(" + localStorage.str_num_playlist_songs + ") +" + tracks_to_append.length);
                                             localStorage.str_num_playlist_songs = num_songs;
                                             playlist_count.innerHTML = num_songs + ' tracks';
                                             populateAlbumsBox();
@@ -423,7 +421,6 @@ require([
 
     models.player.addEventListener('change:track', function (e) {
         if (localStorage.album_radio_playlist) {
-            //console.log(e);
             var debug_box = document.querySelector('#debugging');
             if (models.player.context && models.player.context.uri.substr(-22) == localStorage.album_radio_playlist.substr(-22)) {
                 console.log('Played a song from your playlist - trimming start of playlist');
@@ -434,21 +431,37 @@ require([
                         console.log('snapshot loaded');
                         if (playlist_tracks.find(models.player.track)) {
                             playlist.tracks.snapshot(0, 1).done(function (sn) { deletePlayed(playlist, sn); });
-                            //console.log(playlist_tracks.length - num_deleted);
                             if (playlist_tracks.length/*-num_deleted*/ < 500) {
                                 //add an album
                                 var artists = [];
-                                models.player.track.artists.forEach(function (a) { artists.push(a); });
-                                //models.Promise.join(joined_promises, artists[0].load('related')).always(function (related) {
-                                artists[0].load('related').done(function (related) {
-                                    console.log('yo');
-                                    artists[0].related.snapshot().done(function (related_artists_snapshot) {
-                                        var related_artists = related_artists_snapshot.toArray();
-                                        related_artists.forEach(function (rel) { artists.push(rel); });
-                                        //TODO: add starred and subscribed artists
-                                        addRandomArtistAlbum(artists);
+                                if (e.target.duration != 0) {
+                                    e.oldValue.artists.forEach(function (a) { artists.push(a); });
+                                    artists[0].load('related').done(function (related) {
+                                        console.log('yo');
+                                        artists[0].related.snapshot().done(function (related_artists_snapshot) {
+                                            var related_artists = related_artists_snapshot.toArray();
+                                            related_artists.forEach(function (rel) { artists.push(rel); });
+                                            //TODO: add starred and subscribed artists
+                                            addRandomArtistAlbum(artists);
+                                        });
                                     });
-                                });
+                                } else {
+                                    console.log('you skipped a song, populating from starred artists');
+                                    var library = Library.forCurrentUser();
+                                    library.starred.load('tracks').done(function (starred_playlist) { 
+                                        starred_playlist.tracks.snapshot().done(function (snapshot) {
+                                            snapshot.loadAll('artists')
+                                                .each(function (track) {
+                                                    if (artists.indexOf(track.artists[0]) == -1) {
+                                                        artists.push(track.artists[0]);
+                                                    }
+                                                })
+                                                .done(function (tracks) {
+                                                    addRandomArtistAlbum(artists);
+                                                });
+                                        });
+                                    });
+                                }
                             } else {
                                 console.log("we have enough songs");
                             }
