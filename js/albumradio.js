@@ -223,7 +223,7 @@ require([
                 }
             }
             trigger_promise.setDone();
-            console.log("albums found: " + albums_array.length);
+            console.log("albums found: " + albums_array.length + ", index: " + index);
             if (joined_promises) {
                 joined_promises.always(function () {
                     var first_album = (index == 0);
@@ -252,11 +252,11 @@ require([
                         album_box.appendChild(image.node);
 
                     });
-                    if (snapshot.length >= 500*(index+1)) {
+                    if (snapshot.length >= 500) {
                         var playlist = models.Playlist.fromURI(localStorage.album_radio_playlist);
                         playlist.load('tracks').done(function (tracks) {
                             playlist.tracks.snapshot(500 * (index + 1), 500).done(function (s) {
-                                console.log('load extra songs: ' + s.length);
+                                console.log(index + ' load extra songs: ' + s.length);
                                 var playlist_count = document.querySelector('#playlist_count');
                                 localStorage.str_num_playlist_songs = s.length;
                                 playlist_count.innerHTML = s.length + ' tracks';
@@ -265,10 +265,9 @@ require([
                                 });
                             });
                         });
-                    } else {
+                    } else if(index == 0) {
                         var playlist_count = document.querySelector('#playlist_count');
                         localStorage.str_num_playlist_songs = (500 * index + snapshot.length);
-                        console.log("num playlist songs: " + localStorage.str_num_playlist_songs + " = (500 * " + index + " + " + snapshot.length);
                         playlist_count.innerHTML = localStorage.str_num_playlist_songs + ' tracks';
                     }
 
@@ -426,9 +425,7 @@ require([
                 console.log('Played a song from your playlist - trimming start of playlist');
                 var playlist = models.Playlist.fromURI(localStorage.album_radio_playlist);
                 playlist.load('tracks').done(function (tracks) {
-                    console.log('tracks loaded');
                     playlist.tracks.snapshot(0, 500).done(function (playlist_tracks) {
-                        console.log('snapshot loaded');
                         if (playlist_tracks.find(models.player.track)) {
                             playlist.tracks.snapshot(0, 1).done(function (sn) { deletePlayed(playlist, sn); });
                             if (playlist_tracks.length/*-num_deleted*/ < 500) {
@@ -437,7 +434,6 @@ require([
                                 if (e.target.duration != 0) {
                                     e.oldValue.artists.forEach(function (a) { artists.push(a); });
                                     artists[0].load('related').done(function (related) {
-                                        console.log('yo');
                                         artists[0].related.snapshot().done(function (related_artists_snapshot) {
                                             var related_artists = related_artists_snapshot.toArray();
                                             related_artists.forEach(function (rel) { artists.push(rel); });
@@ -566,3 +562,17 @@ require(['$api/models'], function(models) {
 });
 */
 
+/* for http://stackoverflow.com/a/20478974/9970
+require(['$api/models'], function(models) {
+var mySpotify =
+{
+  playerNextTrack: function()
+  {
+    models.player.skipToNextTrack();
+  },
+}
+
+var playtest = document.querySelector('#playtest');
+playtest.addEventListener('click', function() { mySpotify.playerNextTrack(); });
+
+});*/
