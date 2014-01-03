@@ -1,7 +1,15 @@
 /* Main Elements */
 html {-webkit-user-select: auto;}
 body {min-height: 100%;padding: 10px 0 20px;box-sizing: border-box;}
-section {position: relative;overflow: hidden;margin: 0 0 40px;}
+#bgImageContainer
+{
+    position: absolute;
+    z-index: 0; 
+        
+    /* don't forget to use the prefixes you need */
+    -webkit-filter: grayscale(1) opacity(0.25) sepia(0.5);
+}
+.section {position: relative;overflow: hidden;margin: 0 0 40px; z-index:10;}
 .breadcrumb, .gist {margin: 0 0 20px;}
 .right {float:right;}
 h3 + div {margin: 0 0 35px;}

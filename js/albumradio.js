@@ -189,83 +189,12 @@ require([
         }
     }
 
-    //from http://stackoverflow.com/questions/8173646/html-javascript-desaturate-grayscale-image-rollovers-without-creating-an-i
-    function desaturate(imgObj) {
-
-        var canvas = document.createElement('canvas');
-
-        var canvasContext = canvas.getContext('2d');
-
-        var imgW = 320; //imgObj.width;
-
-        var imgH = 320; //imgObj.height;
-        canvas.width = imgW;
-        canvas.height = imgH;
-        canvasContext.drawImage(imgObj, 0, 0);
-
-        var imgPixels = canvasContext.getImageData(0, 0, imgW, imgH);
-
-        for (var y = 0; y < imgPixels.height; y++) {
-            for (var x = 0; x < imgPixels.width; x++) {
-                var i = (y * 4) * imgPixels.width + x * 4;
-                var avg = (imgPixels.data[i] + imgPixels.data[i + 1] + imgPixels.data[i + 2]) / 3;
-                avg = avg / 2; //dim it
-                imgPixels.data[i] = avg;
-                imgPixels.data[i + 1] = avg;
-                imgPixels.data[i + 2] = avg;
-            }
-        }
-        canvasContext.putImageData(imgPixels, 0, 0, 0, 0, imgPixels.width, imgPixels.height);
-
-        return canvas.toDataURL();
-    }
-
     function setBackgroundImage(album)
     {
-        return; //impl below is against the rules
-
         var image = Image.forAlbum(album, { width: 800, height: 800 });
-        var hidden_box = document.querySelector('#hiddenbox');
-        hidden_box.appendChild(image.node);
-        setTimeout(continueSetBackgroundImage, 5000);
-    }
-
-    function continueSetBackgroundImage() 
-    {
-        var hidden_box = document.querySelector('#hiddenbox');
-        var image = $(hidden_box).find(".sp-image-img");
-        console.log(image.length);
-        if (image.length == 0) {
-            setTimeout(continueSetBackgroundImage, 5000);
-        }
-        else {
-            var img_div = image.first();
-            console.log(img_div.get());
-            var bkimg = img_div.css("background-image");
-            console.log(bkimg);
-            bkimg = bkimg.substr(4);
-            console.log(bkimg);
-            bkimg = bkimg.substr(0,bkimg.length-1);
-            console.log(bkimg);
-            if (typeof bkimg === "undefined") {
-                console.log("durn");
-            } else {
-                //make an image with the data url provided
-                var theimage = document.createElement("img");
-                theimage.src = bkimg;
-
-                var desat = desaturate(theimage);
-                console.log(desat);
-                $('body').css('background-image', 'url(' + desat + ')');
-                var debugimg = document.createElement("img");
-                debugimg.src = desat;
-                var debug_box = document.querySelector('#debugging');
-                //debug_box.appendChild(debugimg);
-                debug_box.appendChild(theimage);
-
-                hidden_box.innerHTML = '';
-            }
-        }
+        var bg = document.querySelector('#bgImageContainer');
+        bg.innerHTML = '';
+        bg.appendChild(image.node);
     }
 
     //don't pass stuff in to this, let it handle the params itself
@@ -312,7 +241,7 @@ require([
                         album.artists.forEach(function (a) { if (!first) { album_title += ', '; } first = false; album_title += a.name; });
                         if (first_album) {
                             first_album = false;
-                            var image = Image.forAlbum(album, { width: 320, height: 320, title: album_title });
+                            var image = Image.forAlbum(album, { width: 192, height: 192, title: album_title });
 
                             var starplus_button = document.createElement('div');
                             starplus_button.classList.add('starplusr');
@@ -657,3 +586,31 @@ var playtest = document.querySelector('#playtest');
 playtest.addEventListener('click', function() { mySpotify.playerNextTrack(); });
 
 });*/
+
+/* from sample code, to repro http://stackoverflow.com/questions/20907867/realtimeanalyzer-memory 
+var numRows = 16, bars = [];
+for (var i = 0; i < numRows * 2; i++) {
+    var bar = document.createElement('meter');
+    bar.min = -1;
+    document.body.appendChild(bar);
+
+    // Add a newline after each pair of bars.
+    if (i % 2) document.body.appendChild(document.createElement('br'));
+
+    bars.push(bar);
+}
+
+require(['$api/audio', '$api/models'], function (audio, models) {
+    var analyzer = audio.RealtimeAnalyzer.forPlayer(models.player);
+
+    analyzer.addEventListener('audio', function (evt) {
+        // There will be 256 samples, but we want to only display every [step]
+        // samples because we have fewer than 256 rows.
+        var step = 256 / numRows;
+        for (var i = 0; i < numRows; i++) {
+            bars[i * 2].value = evt.audio.wave.left[step * i];
+            bars[i * 2 + 1].value = evt.audio.wave.right[step * i];
+        }
+    });
+});
+*/
