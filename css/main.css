@@ -1,6 +1,6 @@
 /* Main Elements */
 html {-webkit-user-select: auto;}
-body {min-height: 100%;padding: 10px 0 20px;box-sizing: border-box;}
+body {min-height: 100%; margin:0px;}
 #bgImageContainer
 {
     position: fixed;
@@ -8,14 +8,14 @@ body {min-height: 100%;padding: 10px 0 20px;box-sizing: border-box;}
     height: 100%;
     width: 100%;
     /* don't forget to use the prefixes you need */
-    -webkit-filter: grayscale(1) opacity(0.25) sepia(0.5);
+    -webkit-filter: grayscale(1) opacity(0.3) sepia(0.9);
 }
 #bgImageContainer .sp-image {
     width: 100%;
     height: 100%;
 }
 
-.section {position: relative;overflow: hidden;margin: 0 0 40px; z-index:10;}
+.section {position: relative;overflow: hidden;z-index:10; padding: 10px 10px 20px; }
 .breadcrumb, .gist {margin: 0 0 20px;}
 .right {float:right;}
 h3 + div {margin: 0 0 35px;}
@@ -40,14 +40,17 @@ h1 {font-size:2em;}
 .sp-image { float:left; }
 
 /* Drop Box */
-#drop_box {border:4px dashed #333;padding:10px; overflow-y:auto; min-height:25px; background-color:rgba(0,0,0,0.3);}
+#drop_box {min-height:25px; }
 #drop_box.over {opacity:0.8;border-color:#74c043;}
 
-/* Debug box*/
-#debugging {border:4px dashed #333;padding:5px; overflow-y:auto;background-color:rgba(0,0,0,0.3);}
-/* Album box*/
-#album_box {border:4px dashed #333;padding:5px; overflow-y:auto; min-height:148px; background-color:rgba(0,0,0,0.3);  }
+#album_box {min-height:148px; }
 
+.dashbox {
+    border: 4px dashed #333;
+    padding: 10px;
+    overflow-y: auto;
+    background-color: rgba(100, 59, 15, 0.16);
+}
 /* Index */
 #index h1, #index ul {margin:0 0 30px;}
 #index a:hover {color:#83be20;}
