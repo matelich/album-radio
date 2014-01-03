@@ -194,6 +194,7 @@ require([
         var image = Image.forAlbum(album, { width: 800, height: 800 });
         var bg = document.querySelector('#bgImageContainer');
         bg.innerHTML = '';
+        image.node.removeAttribute('style');
         bg.appendChild(image.node);
     }
 
