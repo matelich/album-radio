@@ -189,6 +189,85 @@ require([
         }
     }
 
+    //from http://stackoverflow.com/questions/8173646/html-javascript-desaturate-grayscale-image-rollovers-without-creating-an-i
+    function desaturate(imgObj) {
+
+        var canvas = document.createElement('canvas');
+
+        var canvasContext = canvas.getContext('2d');
+
+        var imgW = 320; //imgObj.width;
+
+        var imgH = 320; //imgObj.height;
+        canvas.width = imgW;
+        canvas.height = imgH;
+        canvasContext.drawImage(imgObj, 0, 0);
+
+        var imgPixels = canvasContext.getImageData(0, 0, imgW, imgH);
+
+        for (var y = 0; y < imgPixels.height; y++) {
+            for (var x = 0; x < imgPixels.width; x++) {
+                var i = (y * 4) * imgPixels.width + x * 4;
+                var avg = (imgPixels.data[i] + imgPixels.data[i + 1] + imgPixels.data[i + 2]) / 3;
+                avg = avg / 2; //dim it
+                imgPixels.data[i] = avg;
+                imgPixels.data[i + 1] = avg;
+                imgPixels.data[i + 2] = avg;
+            }
+        }
+        canvasContext.putImageData(imgPixels, 0, 0, 0, 0, imgPixels.width, imgPixels.height);
+
+        return canvas.toDataURL();
+    }
+
+    function setBackgroundImage(album)
+    {
+        return; //impl below is against the rules
+
+        var image = Image.forAlbum(album, { width: 800, height: 800 });
+        var hidden_box = document.querySelector('#hiddenbox');
+        hidden_box.appendChild(image.node);
+        setTimeout(continueSetBackgroundImage, 5000);
+    }
+
+    function continueSetBackgroundImage() 
+    {
+        var hidden_box = document.querySelector('#hiddenbox');
+        var image = $(hidden_box).find(".sp-image-img");
+        console.log(image.length);
+        if (image.length == 0) {
+            setTimeout(continueSetBackgroundImage, 5000);
+        }
+        else {
+            var img_div = image.first();
+            console.log(img_div.get());
+            var bkimg = img_div.css("background-image");
+            console.log(bkimg);
+            bkimg = bkimg.substr(4);
+            console.log(bkimg);
+            bkimg = bkimg.substr(0,bkimg.length-1);
+            console.log(bkimg);
+            if (typeof bkimg === "undefined") {
+                console.log("durn");
+            } else {
+                //make an image with the data url provided
+                var theimage = document.createElement("img");
+                theimage.src = bkimg;
+
+                var desat = desaturate(theimage);
+                console.log(desat);
+                $('body').css('background-image', 'url(' + desat + ')');
+                var debugimg = document.createElement("img");
+                debugimg.src = desat;
+                var debug_box = document.querySelector('#debugging');
+                //debug_box.appendChild(debugimg);
+                debug_box.appendChild(theimage);
+
+                hidden_box.innerHTML = '';
+            }
+        }
+    }
+
     //don't pass stuff in to this, let it handle the params itself
     function populateAlbumsBox(snapshot, index, last_loaded_uri) {
         if (typeof snapshot === "undefined" || !snapshot) {
@@ -240,6 +319,8 @@ require([
                             starplus_button.title = 'Star current song, follow artist, and add another album from this artist, if available';
                             starplus_button.onclick = starPlus;
                             image.node.appendChild(starplus_button);
+
+                            setBackgroundImage(album);
                         } else {
                             var image = Image.forAlbum(album, { width: 64, height: 64, title: album_title });
                         }
