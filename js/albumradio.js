@@ -509,7 +509,7 @@ require([
                     playlist.tracks.snapshot(0, 500).done(function (playlist_tracks) {
                         if (playlist_tracks.find(models.player.track)) {
                             playlist.tracks.snapshot(0, 1).done(function (sn) { deletePlayed(playlist, sn); });
-                            if (playlist_tracks.length/*-num_deleted*/ < 499) {
+                            if (playlist_tracks.length/*-num_deleted*/ <= 500) {
                                 //add an album
                                 var artists = [];
                                 if (e.target.duration != 0) {
