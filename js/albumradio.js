@@ -407,18 +407,17 @@ require([
 
     //REGION Stuff for html page
     var rm = $(".readmore");
-    //for multiple expanders only allowing one open - var hi = $('.hide');
     rm.click(function (e) {
         e.preventDefault();
-        var now = $(this).siblings(".hide");
-        now.slideToggle();
-        if (now.is(":hidden")) {
-            $(this).innerHTML = "Show";
-        } else {
-            $(this).innerHTML = "Hide";
-        }
-
-        //for multiple expanders only allowing one open - hi.not(now).filter(':visible').slideToggle();
+        var now = $(this).parent().siblings(".hide");
+        var bob = this;
+        now.slideToggle(400, function () {
+            if (bob.innerHTML == "Hide") {
+                bob.innerHTML = "Show";
+            } else {
+                bob.innerHTML = "Hide";
+            }
+        });
     });
     //ENDREGION html tomfoolery
 
