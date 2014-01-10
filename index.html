@@ -11,6 +11,7 @@
 <link rel="stylesheet" href="$views/css/list.css">
     <!-- Project CSS files -->
     <link rel="stylesheet" type="text/css" href="css/main.css">
+    <link rel="stylesheet" href="css/flipclock.css">
 
     <!-- google analytics -->
     <script type="text/javascript">
@@ -56,9 +57,14 @@
             </li>
         </ol>
     </div>
+<div>
+    <div class="block rightie"><h2>ALBUMIZER</h2></div>
+    <div class="block">
+        <h3>Drop the playlist you want Album Radio to manage in here</h3>
+        <div id="drop_box" class="dashbox"><div id="playlist_info"><div id="playlist_name"></div><div class="clock" id="playlist_count"></div></div></div>
+    </div>
 
-    <h3>Drop the playlist you want Album Radio to manage in here</h3>
-    <div id="drop_box" class="dashbox"><div id="playlist_info"><div id="playlist_name"></div><div id="playlist_count"></div></div></div>
+    </div>
     <div id="album_box" class="dashbox"></div>
     
     <h3>Activity Log</h3>
@@ -66,6 +72,9 @@
     </div>
 </div>
     <script src="/js/jquery.min.js"></script>
+    <script src="/js/flipclock/libs/base.js"></script>
+    <script src="/js/flipclock/flipclock.js"></script>
+    <script src="/js/flipclock/faces/counter.js"></script>    
     <script src="/js/albumradio.js"></script>
   </body>
 </html>

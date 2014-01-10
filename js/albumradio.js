@@ -5,6 +5,14 @@ require([
 ], function (models, Library, Relations, Image, Throbber/*, Toplist*/, audio) {
     "use strict";
 
+    var clock = null;
+    $(document).ready(function() {          
+        clock = $('#playlist_count').FlipClock(0, {
+            clockFace: 'Counter',
+            countdown: true
+        });
+    });
+
     //REGION Handle drops, html style
     var drop_box = document.querySelector('#drop_box');
 
@@ -268,18 +276,20 @@ require([
                         playlist.load('tracks').done(function (tracks) {
                             playlist.tracks.snapshot(500 * (index + 1), 500).done(function (s) {
                                 console.log(index + ' load extra songs: ' + s.length);
-                                var playlist_count = document.querySelector('#playlist_count');
+                                //var playlist_count = document.querySelector('#playlist_count');
                                 localStorage.str_num_playlist_songs = s.length;
-                                playlist_count.innerHTML = s.length + ' tracks';
+                                //playlist_count.innerHTML = s.length + ' tracks';
+                                clock.setValue(s.length);
                                 s.loadAll('album').done(function (playlist_tracks) {
                                     populateAlbumsBox(playlist_tracks, index + 1, albums_array[albums_array.length - 1].uri);
                                 });
                             });
                         });
                     } else if(index == 0) {
-                        var playlist_count = document.querySelector('#playlist_count');
+                        // var playlist_count = document.querySelector('#playlist_count');
+                        clock.setValue(500 * index + snapshot.length);
                         localStorage.str_num_playlist_songs = (500 * index + snapshot.length);
-                        playlist_count.innerHTML = localStorage.str_num_playlist_songs + ' tracks';
+                        // playlist_count.innerHTML = localStorage.str_num_playlist_songs + ' tracks';
                     }
 
                     throbber.hide();
@@ -298,10 +308,11 @@ require([
                 console.log('deleted a song');
                 if (reload) { populateAlbumsBox(); }
                 else {
-                    var playlist_count = document.querySelector('#playlist_count');
+                    // var playlist_count = document.querySelector('#playlist_count');
                     var num_songs = parseInt(localStorage.str_num_playlist_songs) - 1;
+                    clock.setValue(num_songs);
                     localStorage.str_num_playlist_songs = num_songs;
-                    playlist_count.innerHTML = localStorage.str_num_playlist_songs + ' tracks';
+                    // playlist_count.innerHTML = localStorage.str_num_playlist_songs + ' tracks';
                 }
                 playlist.tracks.snapshot(0, 1).done(function (sn) { deletePlayed(playlist, sn); });
             });
@@ -362,10 +373,11 @@ require([
                                             debug_box.appendChild(debug_message);
                                             if (debug_box.children.length > 4)
                                                 debug_box.removeChild(debug_box.children[0]);
-                                            var playlist_count = document.querySelector('#playlist_count');
+                                            // var playlist_count = document.querySelector('#playlist_count');
                                             var num_songs = parseInt(localStorage.str_num_playlist_songs) + tracks_to_append.length;
+                                            clock.setValue(num_songs);
                                             localStorage.str_num_playlist_songs = num_songs;
-                                            playlist_count.innerHTML = num_songs + ' tracks';
+                                            // playlist_count.innerHTML = num_songs + ' tracks';
                                             populateAlbumsBox();
                                         })
                                         .fail(function (blah, err) { console.log("failed to append " + err.message); });
@@ -614,3 +626,19 @@ require(['$api/audio', '$api/models'], function (audio, models) {
     });
 });
 */
+
+require(['$api/models'], function(models) {
+
+    models.player.addEventListener('change:context', contextChanged);
+
+    var last_context=null;
+    function contextChanged(e) {
+        if(last_context != e.target.context.uri) {
+            last_context = e.target.context.uri;
+            console.log('hola, new context uri - ' + last_context);
+        }
+        else {
+            console.log('faux context change');
+        }
+    }
+});

@@ -3,6 +3,14 @@
 	{
 		"selected_items":
 		[
+			[
+				"play",
+				"playlist_count"
+			],
+			[
+				"num",
+				"num_songs"
+			]
 		]
 	},
 	"buffers":
@@ -11,15 +19,31 @@
 			"file": "js/albumradio.js",
 			"settings":
 			{
-				"buffer_size": 28439,
+				"buffer_size": 29400,
 				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "js/flipclock/faces/counter.js",
+			"settings":
+			{
+				"buffer_size": 1899,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "js/flipclock/flipclock.js",
+			"settings":
+			{
+				"buffer_size": 26686,
+				"line_ending": "Unix"
 			}
 		},
 		{
 			"file": "index.html",
 			"settings":
 			{
-				"buffer_size": 2749,
+				"buffer_size": 3105,
 				"line_ending": "Windows"
 			}
 		},
@@ -27,7 +51,7 @@
 			"file": "css/main.css",
 			"settings":
 			{
-				"buffer_size": 1801,
+				"buffer_size": 1870,
 				"line_ending": "Windows"
 			}
 		}
@@ -59,7 +83,7 @@
 	],
 	"find":
 	{
-		"height": 0.0
+		"height": 34.0
 	},
 	"find_in_files":
 	{
@@ -73,6 +97,10 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"playlist_count",
+			"increment",
+			"console.log",
+			"populateAlbumsBox"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -90,7 +118,7 @@
 	"groups":
 	[
 		{
-			"selected": 2,
+			"selected": 4,
 			"sheets":
 			[
 				{
@@ -98,15 +126,15 @@
 					"file": "js/albumradio.js",
 					"settings":
 					{
-						"buffer_size": 28439,
+						"buffer_size": 29400,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								183,
-								183
+								0,
+								0
 							]
 						],
 						"settings":
@@ -116,25 +144,79 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 45.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
 				},
 				{
 					"buffer": 1,
-					"file": "index.html",
+					"file": "js/flipclock/faces/counter.js",
 					"settings":
 					{
-						"buffer_size": 2749,
+						"buffer_size": 1899,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								0,
-								0
+								1899,
+								1899
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 110.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "js/flipclock/flipclock.js",
+					"settings":
+					{
+						"buffer_size": 26686,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								924,
+								924
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 30.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "index.html",
+					"settings":
+					{
+						"buffer_size": 3105,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								2457,
+								2457
 							]
 						],
 						"settings":
@@ -144,25 +226,25 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 480.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
 				},
 				{
-					"buffer": 2,
+					"buffer": 4,
 					"file": "css/main.css",
 					"settings":
 					{
-						"buffer_size": 1801,
+						"buffer_size": 1870,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								0,
-								0
+								511,
+								511
 							]
 						],
 						"settings":

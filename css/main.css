@@ -26,6 +26,8 @@ h3 + div {margin: 0 0 35px;}
 #index h1 {background-image:url('/img/spotify-apps-tutorial.png');background-repeat: no-repeat;width:600px;height:83px;text-indent:-9999em;}
 */
 
+/*.block {display:inline;}*/
+.rightie { float: right; margin: 20px;}
 
 /* Text */
 h1 {font-size:2em;}
