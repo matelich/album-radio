@@ -28,3 +28,5 @@ Other notes
 My first Git project and first public project, so take it easy on me :)
 
 I'm using VS2012 as my editor because I'm used to the keyboard shortcuts and editor quirks.
+
+[![Fund me on Gittip](https://raw.github.com/gittip/www.gittip.com/master/www/assets/gittip.png)](https://www.gittip.com/matelich/ "Fund me on Gittip")
