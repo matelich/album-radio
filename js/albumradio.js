@@ -14,32 +14,33 @@ require([
     });
 
     //REGION Handle drops, html style
-    var drop_box = document.querySelector('#drop_box');
+    var drop_area = document.body; 
 
-    drop_box.addEventListener('dragstart', function (e) {
+    drop_area.addEventListener('dragstart', function (e) {
         e.dataTransfer.setData('text/html', this.innerHTML);
         e.dataTransfer.effectAllowed = 'copy';
     }, false);
 
-    drop_box.addEventListener('dragenter', function (e) {
+    drop_area.addEventListener('dragenter', function (e) {
         e.preventDefault();
         e.dataTransfer.dropEffect = 'copy';
         this.classList.add('over');
     }, false);
 
-    drop_box.addEventListener('dragover', function (e) {
+    drop_area.addEventListener('dragover', function (e) {
         e.preventDefault();
         e.dataTransfer.dropEffect = 'copy';
         return false;
     }, false);
 
-    drop_box.addEventListener('dragleave', function (e) {
+    drop_area.addEventListener('dragleave', function (e) {
         e.preventDefault();
         this.classList.remove('over');
     }, false);
 
-    drop_box.addEventListener('drop', function (e) {
+    drop_area.addEventListener('drop', function (e) {
         e.preventDefault();
+        console.log('droppy ' + e.dataTransfer.getData('text'));
         var drop = models.Playlist.fromURI(e.dataTransfer.getData('text'));
         this.classList.remove('over');
         var success_message = document.createElement('p');
@@ -55,6 +56,7 @@ require([
                         allowed_message.remove();
                     }, 5000);
                     localStorage.album_radio_playlist = drop.uri;
+                    document.getElementById('noplaylistmsg').style.display = 'none';
                     populateAlbumsBox();
                 }
                 else {
@@ -65,20 +67,20 @@ require([
                         disallowed_message.remove();
                     }, 5000);
                     localStorage.album_radio_playlist = null;
+                    document.getElementById('noplaylistmsg').style.display = '';
                 }
             });
         });
     }, false);
 
 
-    /* Not using this because dropping a playlist just causes that playlist to be loaded
-        models.application.addEventListener('dropped', function () {
-            console.log('hola!');
-            var dropped = models.application.dropped; // it contains the dropped elements
-            console.log(dropped.length);
-            console.log(JSON.stringify(dropped));
-        });
-    */
+    models.application.addEventListener('dropped', function () {
+        console.log('hola!');
+        var dropped = models.application.dropped; // it contains the dropped elements
+        console.log(dropped.length);
+        console.log(JSON.stringify(dropped));
+    });
+    
     //ENDREGION drag/drop
 
     //REGION utility funcs
@@ -403,6 +405,7 @@ require([
             debug_box.removeChild(debug_box.children[0]);
         var allowed_message = document.createElement('p');
         allowed_message.innerHTML = 'Working with previously stored playlist';
+        document.getElementById('noplaylistmsg').style.display = 'none';
         drop_box.appendChild(allowed_message);
         setTimeout(function () {
             allowed_message.remove();
@@ -627,6 +630,7 @@ require(['$api/audio', '$api/models'], function (audio, models) {
 });
 */
 
+/*
 require(['$api/models'], function(models) {
 
     models.player.addEventListener('change:context', contextChanged);
@@ -642,3 +646,18 @@ require(['$api/models'], function(models) {
         }
     }
 });
+*/
+
+/* http://stackoverflow.com/questions/21178883/how-to-get-list-of-artist-following-in-spotify 
+require(['$api/models', '$api/relations#Relations'], function (models, Relations) {
+  var rels = Relations.forCurrentUser();
+  rels.combinedSubscriptions.snapshot().done(function(snapshot) {
+    console.log('You are following ' +  snapshot.length + ' users/artists.');
+    console.log('Here are your followings:' + snapshot.toArray());
+    var deftones = models.Artist.fromURI('spotify:artist:6Ghvu1VvMGScGpOUJBAHNH');
+    console.log(snapshot.find(deftones));
+    var notdeftones = models.Artist.fromURI('spotify:artist:6Ghvu1VvMGScGpOUJBAHHH');
+    console.log(snapshot.find(notdeftones));
+  });
+});
+*/

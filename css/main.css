@@ -18,16 +18,13 @@ body {min-height: 100%; margin:0px;}
 .section {position: relative;overflow: hidden;z-index:10; padding: 10px 10px 20px; }
 .breadcrumb, .gist {margin: 0 0 20px;}
 .right {float:right;}
-h3 + div {margin: 0 0 35px;}
+/*h3 + div {margin: 0 0 35px;}*/
 
 
 /* Headers */
-/*
-#index h1 {background-image:url('/img/spotify-apps-tutorial.png');background-repeat: no-repeat;width:600px;height:83px;text-indent:-9999em;}
-*/
+
 
 /*.block {display:inline;}*/
-.rightie { float: right; margin: 20px;}
 
 /* Text */
 h1 {font-size:2em;}
@@ -53,6 +50,8 @@ h1 {font-size:2em;}
     overflow-y: auto;
     background-color: rgba(100, 59, 15, 0.16);
 }
+.killscroll { overflow: hidden }
+
 /* Index */
 #index h1, #index ul {margin:0 0 30px;}
 #index a:hover {color:#83be20;}

@@ -17,6 +17,7 @@
 	  "api": "1.0.0",
 	  "views": "1.0.0"
     },
+	"AcceptedLinkTypes": ["album", "artist", "playlist", "track"],
 	"RequiredPermissions": [
 	    "http://www.google-analytics.com"
 	],
