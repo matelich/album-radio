@@ -27,6 +27,12 @@
         })();
 
 </script>
+    <script type="text/javascript">
+        function scrollToBottom()
+        {
+            window.scrollTo(0, document.body.scrollHeight);
+        }
+    </script>
 </head>
 <body>
     <div id="bgImageContainer">
@@ -39,6 +45,7 @@
 
         </div></div>
 <div class="section">
+    <a href="top"></a>
     <h1>Album Radio</h1>
     <p class="description">Hey this is the number one <a href="http://github.com/matelich/album-radio">open source</a> Spotify app for album radio!</p>
     <div>
@@ -57,6 +64,7 @@
             </li>
         </ol>
     </div>
+
     <div id="drop_box">
         <h3 id="noplaylistmsg">Drag and Drop a playlist you want Album Radio to manage</h3>
         <div id="playlist_info" class="killscroll">
@@ -64,12 +72,17 @@
         </div>
     </div>
 
+    <a href="#bottom" onclick="scrollToBottom()">scroll to bottom to see current album cover better</a>
     <div id="album_box" class="dashbox"></div>
     
     <h3>Activity Log</h3>
     <div id="debugging" class="dashbox">
     </div>
-<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+    <div id="blankarea"></div>
+    <a href="#top">top</a>
+    <a href="bottom"></a>
+
     <script src="/js/jquery.min.js"></script>
     <script src="/js/flipclock/libs/base.js"></script>
     <script src="/js/flipclock/flipclock.js"></script>
