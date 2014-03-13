@@ -2,13 +2,13 @@
 <head>
     <!-- Spotify CSS files -->
     <!-- new <link rel="stylesheet" href="$views/css/buttons.css">
-<link rel="stylesheet" href="$views/css/popup.css">
-<link rel="stylesheet" href="$views/css/scrollbar.css">
-<link rel="stylesheet" href="$views/css/tabbar.css">-->
-    <link rel="stylesheet" href="$views/css/throbber.css"> 
+    <link rel="stylesheet" href="$views/css/popup.css">
+    <link rel="stylesheet" href="$views/css/scrollbar.css">
+    <link rel="stylesheet" href="$views/css/tabbar.css">-->
+    <link rel="stylesheet" href="$views/css/throbber.css">
     <link rel="stylesheet" href="$views/css/image.css">
-<link rel="stylesheet" href="$views/css/scrollbar.css">
-<link rel="stylesheet" href="$views/css/list.css">
+    <link rel="stylesheet" href="$views/css/scrollbar.css">
+    <link rel="stylesheet" href="$views/css/list.css">
     <!-- Project CSS files -->
     <link rel="stylesheet" href="css/flipclock.css">
     <link rel="stylesheet" type="text/css" href="css/main.css">
@@ -26,67 +26,72 @@
             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
         })();
 
-</script>
+    </script>
     <script type="text/javascript">
-        function scrollToBottom()
-        {
-            window.scrollTo(0, document.body.scrollHeight);
+        function toggleBackground() {
+            //window.scrollTo(0, document.body.scrollHeight);
+            $("#bgImageContainer").toggleClass('frontsalot');
+            $("#bgImageContainer").toggleClass('lightbg');
+            $()
         }
     </script>
 </head>
 <body>
-    <div id="bgImageContainer">
+    <div id="bgImageContainer" class="lightbg">
         <div about='http://farm8.static.flickr.com/7065/6906906289_8264b19786_m.jpg'>
             <a href='http://www.flickr.com/photos/27587002@N07/6906906289/' target='_blank'>
-                <img xmlns:dct='http://purl.org/dc/terms/' href='http://purl.org/dc/dcmitype/StillImage' rel='dct:type' src='img/default_album.png' alt='Music by jonkriz, on Flickr' title='Music by jonkriz, on Flickr' border='0'/></a>
-            <br/><a rel='license' href='http://creativecommons.org/licenses/by/2.0/' target='_blank'>
+                <img xmlns:dct='http://purl.org/dc/terms/' href='http://purl.org/dc/dcmitype/StillImage' rel='dct:type' src='img/default_album.png' alt='Music by jonkriz, on Flickr' title='Music by jonkriz, on Flickr' border='0' /></a>
+            <br />
+            <a rel='license' href='http://creativecommons.org/licenses/by/2.0/' target='_blank'>
                 <img src='http://i.creativecommons.org/l/by/2.0/80x15.png' alt='Creative Commons Attribution 2.0 Generic License' title='Creative Commons Attribution 2.0 Generic License' border='0' align='left'></a>&nbsp;&nbsp;by&nbsp;<a href='http://www.flickr.com/people/27587002@N07/' target='_blank'>&nbsp;</a>
             <a xmlns:cc='http://creativecommons.org/ns#' rel='cc:attributionURL' property='cc:attributionName' href='http://www.flickr.com/people/27587002@N07/' target='_blank'>jonkriz</a>
-
-        </div></div>
-<div class="section">
-    <a href="top"></a>
-    <h1>Album Radio</h1>
-    <p class="description">Hey this is the number one <a href="http://github.com/matelich/album-radio">open source</a> Spotify app for album radio!</p>
-    <div>
-        <div>A few things you should know before you get started - <a class="readmore" href="#">Show</a></div>
-        <ol class="hide">
-            <li>This app can only work while you're here (and for 60 seconds after you leave)
-                <ul><li>You can use this to your advantage, if you don't know if you want artists related to this artist added</li></ul>
-            </li>
-            <li>You can only operate the radio on your own playlists, and you need to create one for me yourself along with one or more songs.
+        </div>
+    </div>
+    <div class="section">
+        <a href="top"></a>
+        <h1>Album Radio</h1>
+        <p class="description">Hey this is the number one <a href="http://github.com/matelich/album-radio">open source</a> Spotify app for album radio!</p>
+        <div>
+            <div>A few things you should know before you get started - <a class="readmore" href="#">Show</a></div>
+            <ol class="hide">
+                <li>This app can only work while you're here (and for 60 seconds after you leave)
+                <ul>
+                    <li>You can use this to your advantage, if you don't know if you want artists related to this artist added</li>
+                </ul>
+                </li>
+                <li>You can only operate the radio on your own playlists, and you need to create one for me yourself along with one or more songs.
                 <ul>
                     <li>It's recommended to take a few songs from favorite artists to initially populate the playlist</li>
                     <li>You can switch between multiple playlists, just drag them to the playlist box below</li>
                 </ul>
-            </li>
-            <li>Album Radio deletes played songs from the start of your playlist
-            </li>
-        </ol>
-    </div>
+                </li>
+                <li>Album Radio deletes played songs from the start of your playlist
+                </li>
+            </ol>
+        </div>
 
-    <div id="drop_box">
-        <h3 id="noplaylistmsg">Drag and Drop a playlist you want Album Radio to manage</h3>
-        <div id="playlist_info" class="killscroll">
-            <h2 id="playlist_name"></h2><div class="clock" id="playlist_count"></div>
+        <div id="drop_box">
+            <h3 id="noplaylistmsg">Drag and Drop a playlist you want Album Radio to manage</h3>
+            <div id="playlist_info" class="killscroll">
+                <h2 id="playlist_name"></h2>
+                <div class="clock" id="playlist_count"></div>
+            </div>
+        </div>
+
+        <div id="album_box" class="dashbox"></div>
+
+        <h3>Activity Log</h3>
+        <div id="debugging" class="dashbox">
         </div>
     </div>
 
-    <a href="#bottom" onclick="scrollToBottom()">scroll to bottom to see current album cover better</a>
-    <div id="album_box" class="dashbox"></div>
-    
-    <h3>Activity Log</h3>
-    <div id="debugging" class="dashbox">
+    <div class="bottomright">
+        <a href="#" onclick="toggleBackground()">Toggle Album Cover In Background</a>
     </div>
-
-    <div id="blankarea"></div>
-    <a href="#top">top</a>
-    <a href="bottom"></a>
-
     <script src="/js/jquery.min.js"></script>
     <script src="/js/flipclock/libs/base.js"></script>
     <script src="/js/flipclock/flipclock.js"></script>
-    <script src="/js/flipclock/faces/counter.js"></script>    
+    <script src="/js/flipclock/faces/counter.js"></script>
     <script src="/js/albumradio.js"></script>
-  </body>
+</body>
 </html>

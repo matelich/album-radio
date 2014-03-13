@@ -1,15 +1,29 @@
 /* Main Elements */
 html {-webkit-user-select: auto;}
 body {min-height: 100%; margin:0px;}
-#bgImageContainer
-{
+#bgImageContainer {
     position: fixed;
-    z-index: 0; 
     height: 100%;
     width: 100%;
+    -webkit-transition:-webkit-filter 0.4s ease-in-out;   
+}
+
+.lightbg {
     /* don't forget to use the prefixes you need */
+    z-index: 0;
     -webkit-filter: grayscale(1) opacity(0.3) sepia(0.9);
 }
+.frontsalot {
+    z-index: 100;
+}
+
+.bottomright {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    z-index: 110;
+}
+
 #bgImageContainer .sp-image {
     width: 100%;
     height: 100%;

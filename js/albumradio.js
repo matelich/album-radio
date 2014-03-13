@@ -417,6 +417,15 @@ require([
         if (models.player.context) {
             console.log("currently playing from context (playlist) " + models.player.context.uri);
         }
+        /* Test for Niz on IRC
+        models.player.playContext(models.Playlist.fromURI(localStorage.album_radio_playlist));
+        setTimeout(function() {
+            models.player.pause();
+            setTimeout(function() {
+                models.player.play();}, 
+                5000);},
+            5000);
+            */
     });
     //ENDREGION initial setup
 
@@ -661,3 +670,26 @@ require(['$api/models', '$api/relations#Relations'], function (models, Relations
   });
 });
 */
+
+/* http://stackoverflow.com/questions/22121781/spotifys-collections-shuffle-method-not-working-as-expected
+    require(['$api/models'], function (models) {
+        playlist = models.Playlist.fromURI(localStorage.album_radio_playlist);
+
+        playlist.load('tracks').done(function (tracks) {
+            console.log(tracks);
+            // Works when shuffle() is removed                    
+            playlist.tracks.shuffle().snapshot()
+              .done(
+
+                function (snapshot) {
+                    console.log(snapshot);
+
+                    for (var i = 0; i < snapshot.length; i++) {
+                        var track = snapshot.get(i);
+                        console.log(track.name);
+                    }
+                }
+              ).fail(function (blah, err) { console.log("failed to shuffle " + err + ", " + blah); });
+        });
+    });
+    */
