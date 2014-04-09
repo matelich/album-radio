@@ -1,9 +1,347 @@
-require([
-    '$api/models', '$api/library#Library', '$api/relations#Relations', '$views/image#Image', '$views/throbber#Throbber'
-      //,'$api/toplists#Toplist'
-      , '$api/audio'
-], function (models, Library, Relations, Image, Throbber/*, Toplist*/, audio) {
-    "use strict";
+/*globals R, Main, Spinner, rdioUtils */
+
+(function () {
+
+    // ==========
+    window.Main = {
+        Models: {},
+        Views: {},
+        currentView: null,
+
+        // ----------
+        init: function () {
+            var self = this;
+            $("#unauthorized").toggle(false);
+            $("#playlist_selection").toggle(false);
+
+            if (!rdioUtils.startupChecks()) {
+                return;
+            }
+
+            R.ready(function () {
+                //self.spin(false);
+                if (R.authenticated()) {
+                    self.beenAuthenticated();
+                    //self.go("following");
+                } else {
+                    $("#unauthorized").toggle(true);
+                    //self.go("unauthenticated");
+                }
+            });
+
+            //self.spin(true);
+        },
+
+        beenAuthenticated: function() {
+            var self = this;
+            var url = R.currentUser.get('url');
+            console.log(url);
+/*
+            R.request({
+                method: 'getObjectFromUrl',
+                content: {
+                    url: url
+                },
+                success: function (data) {
+                    var username = data.result.firstName + ' ' + data.result.lastName;
+                    self.currentUserKey = data.result.key;
+                    console.log(data.result.key);
+                    console.log(self.currentUserKey);
+*/
+                    $("#unauthorized").toggle(false);
+                    console.log(R.currentUser);
+                    if (localStorage.lastUser == R.currentUser.get('key') && localStorage.album_radio_playlist != null) {
+                        self.loadPlaylist();
+                    } else {
+                        self.showPlaylistSelector();
+                    }
+                    localStorage.lastUser = R.currentUser.get('key');
+/*
+                },
+                error: function (response) {
+                    console.log("error: " + response.message);
+                }
+            });
+*/
+        },
+
+        showPlaylistSelector: function() {
+            var self = this;
+            $("#playlist_selection").toggle(true);
+            R.request({
+                method: 'getUserPlaylists',
+                content: {
+                    user: R.currentUser.get('key'),
+                    count: 100
+                },
+                success: function (data) {
+                    var combo = $("#playlist_selector");
+                    combo.innerHTML = "";
+                    combo.append($("<option></option>")
+                            .attr("value", 0));
+                    for (var i = 0; i < data.result.length; i++) {
+                        combo.append($("<option></option>")
+                            .attr("value", data.result[i].key)
+                            .text(data.result[i].name));
+                    }
+                    combo.change(function (event) {
+                        console.log(combo.val());
+                        $("#playlist_selection").toggle(false);
+                        localStorage.album_radio_playlist = combo.val();
+                        self.loadPlaylist();
+                    });
+                    //TODO: check if length == 100 and get more
+                },
+                error: function (response) {
+                    console.log("error: " + response.message);
+                }
+            });
+        },
+
+        loadPlaylist: function () {
+            var self = this;
+            var debug_box = document.querySelector('#debugging');
+            var debug_message = document.createElement('p');
+            debug_message.innerHTML = 'You have a playlist stored in localstorage: ' + localStorage.album_radio_playlist + " - " + new Date().toUTCString();
+            debug_box.appendChild(debug_message);
+            if (debug_box.children.length > 4)
+                debug_box.removeChild(debug_box.children[0]);
+            var allowed_message = document.createElement('p');
+            allowed_message.innerHTML = 'Working with previously stored playlist';
+            document.getElementById('noplaylistmsg').style.display = 'none';
+            drop_box.appendChild(allowed_message);
+            setTimeout(function () {
+                allowed_message.remove();
+            }, 5000);
+            self.populateAlbumsBox();
+        },
+        
+        populateAlbumsBox: function (snapshot, index, last_loaded_uri) {
+        /*
+                if (typeof snapshot === "undefined" || !snapshot) {
+                    var playlist = models.Playlist.fromURI(localStorage.album_radio_playlist);
+                    playlist.load('tracks', 'name').done(function (tracks) {
+                        var playlist_name = document.querySelector('#playlist_name');
+                        playlist_name.innerHTML = playlist.name;
+                        playlist.tracks.snapshot(0, 500).done(function (s) {
+                            s.loadAll('album').done(function (playlist_tracks) {
+                                populateAlbumsBox(playlist_tracks, 0);
+                            });
+                        });
+                    });
+                } else {
+                    if (index == 0) {
+                        album_box.innerHTML = '';
+                    }
+                    var throbber = Throbber.forElement(album_box);
+                    var albums_array = [];
+                    var trigger_promise = new models.Promise();
+                    var joined_promises = null;
+                    for (var i = 0; i < snapshot.length; i++) {
+                        var album = snapshot[i].album;
+                        if (albums_array.indexOf(album) == -1 && (index == 0 || album.uri != last_loaded_uri)) {
+                            albums_array.push(album);
+                            var load_promise = album.load('name', 'artists');
+                            if (joined_promises == null) {
+                                joined_promises = models.Promise.join(trigger_promise, load_promise);
+                            } else {
+                                joined_promises = models.Promise.join(joined_promises, load_promise);
+                            }
+                        }
+                    }
+                    trigger_promise.setDone();
+                    console.log("albums found: " + albums_array.length + ", index: " + index);
+                    if (joined_promises) {
+                        joined_promises.always(function () {
+                            var first_album = (index == 0);
+                            albums_array.forEach(function (album) {
+                                var album_title = album.name + ' by ';
+                                var first = true;
+                                album.artists.forEach(function (a) { if (!first) { album_title += ', '; } first = false; album_title += a.name; });
+                                if (first_album) {
+                                    first_album = false;
+                                    var image = Image.forAlbum(album, { width: 256, height: 256, title: album_title });
+        
+                                    var starplus_button = document.createElement('div');
+                                    starplus_button.classList.add('starplusr');
+                                    starplus_button.title = 'Star current song, follow artist, and add another album from this artist, if available';
+                                    starplus_button.onclick = starPlus;
+                                    image.node.appendChild(starplus_button);
+        
+                                    setBackgroundImage(album);
+                                } else {
+                                    var image = Image.forAlbum(album, { width: 64, height: 64, title: album_title });
+                                }
+                                var delete_button = document.createElement('div');
+                                delete_button.classList.add('deleter');
+                                delete_button.title = 'Delete This Album';
+                                delete_button.onclick = deleteAlbum;
+                                image.node.appendChild(delete_button);
+        
+                                album_box.appendChild(image.node);
+        
+                            });
+                            if (snapshot.length >= 500) {
+                                var playlist = models.Playlist.fromURI(localStorage.album_radio_playlist);
+                                playlist.load('tracks').done(function (tracks) {
+                                    playlist.tracks.snapshot(500 * (index + 1), 500).done(function (s) {
+                                        console.log(index + ' load extra songs: ' + s.length);
+                                        //var playlist_count = document.querySelector('#playlist_count');
+                                        localStorage.str_num_playlist_songs = s.length;
+                                        //playlist_count.innerHTML = s.length + ' tracks';
+                                        clock.setValue(s.length);
+                                        s.loadAll('album').done(function (playlist_tracks) {
+                                            populateAlbumsBox(playlist_tracks, index + 1, albums_array[albums_array.length - 1].uri);
+                                        });
+                                    });
+                                });
+                            } else if(index == 0) {
+                                // var playlist_count = document.querySelector('#playlist_count');
+                                clock.setValue(500 * index + snapshot.length);
+                                localStorage.str_num_playlist_songs = (500 * index + snapshot.length);
+                                // playlist_count.innerHTML = localStorage.str_num_playlist_songs + ' tracks';
+                            }
+        
+                            throbber.hide();
+                        });
+                    }
+                    else {
+                        throbber.hide();
+                    }
+                }
+        */
+        },
+
+        getPlaylistAlbums: function (callback, snapshot, index, albums_array, last_loaded_uri) {
+    /*
+            if (typeof snapshot === "undefined" || !snapshot) {
+                var playlist = models.Playlist.fromURI(localStorage.album_radio_playlist);
+                playlist.load('tracks').done(function (tracks) {
+                    playlist.tracks.snapshot(0, 500).done(function (s) {
+                        s.loadAll('album').done(function (playlist_tracks) {
+                            var foo = [];
+                            getPlaylistAlbums(callback, playlist_tracks, 0, foo);
+                        });
+                    });
+                });
+            } else {
+                var trigger_promise = new models.Promise();
+                var joined_promises = null;
+                console.log("snapshot length: " + snapshot.length);
+                for (var i = 0; i < snapshot.length; i++) {
+                    var album = snapshot[i].album;
+                    if (albums_array.indexOf(album) == -1 && (index == 0 || album.uri != last_loaded_uri)) {
+                        albums_array.push(album);
+                        var load_promise = album.load('name', 'artists');
+                        if (joined_promises == null) {
+                            joined_promises = models.Promise.join(trigger_promise, load_promise);
+                        } else {
+                            joined_promises = models.Promise.join(joined_promises, load_promise);
+                        }
+                    }
+                }
+                trigger_promise.setDone();
+                console.log("albums found: " + albums_array.length);
+                if (joined_promises) {
+                    joined_promises.always(function () {
+                        if (snapshot.length >= 500) {
+                            var playlist = models.Playlist.fromURI(localStorage.album_radio_playlist);
+                            playlist.load('tracks').done(function (tracks) {
+                                playlist.tracks.snapshot(500 * (index + 1), 500).done(function (s) {
+                                    console.log('load extra songs: ' + s.length);
+                                    s.loadAll('album').done(function (playlist_tracks) {
+                                        getPlaylistAlbums(callback, playlist_tracks, index + 1, albums_array, albums_array[albums_array.length - 1].uri);
+                                    });
+                                });
+                            });
+                        } else {
+                            callback(albums_array);
+                        }
+                    });
+                }
+                else {
+                    callback(albums_array);
+                }
+            }
+    */
+        },
+
+        // ----------
+/*
+        go: function (mode) {
+            var $div = $("<div>")
+              .attr("id", mode)
+              .append(self.template(mode));
+
+            $("#content")
+              .empty()
+              .append($div);
+
+            self.mode = mode;
+            var viewClass = self.upperCaseInitial(self.mode);
+            if (viewClass in self.Views) {
+                self.currentView = new self.Views[viewClass]({
+                    $el: $div
+                });
+            }
+        },
+*/
+
+        // ----------
+/*
+        spin: function (value) {
+            if (value) {
+                self.spinner = new Spinner({
+                    radius: 6,
+                    length: 6,
+                    width: 2,
+                    color: '#444'
+                }).spin($("#spin-container")[0]);
+            } else {
+                self.spinner.stop();
+            }
+        },
+*/
+
+        // ----------
+        /*template: function (name, config) {
+            var rawTemplate = $.trim($("#" + name + "-template").text());
+            var template = _.template(rawTemplate);
+            var html = template(config);
+            return $(html);
+        },*/
+
+        // ----------
+        upperCaseInitial: function (val) {
+            return val.replace(/^([a-z])/, function ($0, $1) {
+                return $1.toUpperCase();
+            });
+        }
+    };
+
+    // ----------
+    $(document).ready(function () {
+        Main.init();
+    });
+
+})();
+
+//Authentication
+(function () {
+
+    // ==========
+    //Main.Views.Unauthenticated = function () {
+        $("#authenticate")
+          .click(function () {
+              R.authenticate(function (authenticated) {
+                  if (authenticated) {
+                      Main.authenticated();
+                  }
+              });
+          });
+    //};
+
+})();
 
     var clock = null;
     $(document).ready(function() {          
@@ -17,14 +355,14 @@ require([
     var drop_area = document.body; 
 
     drop_area.addEventListener('dragstart', function (e) {
-        e.dataTransfer.setData('text/html', this.innerHTML);
+        e.dataTransfer.setData('text/html', self.innerHTML);
         e.dataTransfer.effectAllowed = 'copy';
     }, false);
 
     drop_area.addEventListener('dragenter', function (e) {
         e.preventDefault();
         e.dataTransfer.dropEffect = 'copy';
-        this.classList.add('over');
+        self.classList.add('over');
     }, false);
 
     drop_area.addEventListener('dragover', function (e) {
@@ -35,17 +373,18 @@ require([
 
     drop_area.addEventListener('dragleave', function (e) {
         e.preventDefault();
-        this.classList.remove('over');
+        self.classList.remove('over');
     }, false);
 
     drop_area.addEventListener('drop', function (e) {
         e.preventDefault();
         console.log('droppy ' + e.dataTransfer.getData('text'));
+/*
         var drop = models.Playlist.fromURI(e.dataTransfer.getData('text'));
-        this.classList.remove('over');
+        self.classList.remove('over');
         var success_message = document.createElement('p');
         success_message.innerHTML = 'Playlist successfully dropped: ' + drop.uri;
-        this.appendChild(success_message);
+        self.appendChild(success_message);
         drop.load('owner').done(function (playlist) {
             playlist.owner.load('currentUser').done(function (owner) {
                 if (owner.currentUser) {
@@ -71,20 +410,15 @@ require([
                 }
             });
         });
+*/
     }, false);
 
 
-    models.application.addEventListener('dropped', function () {
-        console.log('hola!');
-        var dropped = models.application.dropped; // it contains the dropped elements
-        console.log(dropped.length);
-        console.log(JSON.stringify(dropped));
-    });
-    
     //ENDREGION drag/drop
 
     //REGION utility funcs
     function starPlus(e) {
+/*
         var library = Library.forCurrentUser();
         library.star(models.player.track).done(function () { console.log("Added current song to Starred"); });
         var artists = [];
@@ -92,9 +426,11 @@ require([
         addRandomArtistAlbum(artists);
         var rels = Relations.forCurrentUser();
         rels.subscribe(artists[0]);
+*/
     }
 
     function deleteAlbum(e) {
+/*
         var playlist = models.Playlist.fromURI(localStorage.album_radio_playlist);
         models.player.track.load('album').done(function () {
             var album_uri = e.target.parentNode.getAttribute('data-uri');
@@ -106,9 +442,11 @@ require([
                 });
             });
         });
+*/
     }
 
     function deleteAlbumTracks(playlist, album_uri, next_track, snappy, snap_tracks, start_index) {
+/*
         if (snap_tracks.length == 0) { return; }
 
         for (var i = 0; i < snap_tracks.length; i++) {
@@ -144,166 +482,26 @@ require([
         playlist.tracks.snapshot(start_index + snap_tracks.length, 20).done(function (s) {
             s.loadAll('album').done(function (sn) { deleteAlbumTracks(playlist, album_uri, next_track, s, sn, start_index + i); });
         });
+*/
     }
 
     //only pass callback to this
-    function getPlaylistAlbums(callback, snapshot, index, albums_array, last_loaded_uri) {
-        if (typeof snapshot === "undefined" || !snapshot) {
-            var playlist = models.Playlist.fromURI(localStorage.album_radio_playlist);
-            playlist.load('tracks').done(function (tracks) {
-                playlist.tracks.snapshot(0, 500).done(function (s) {
-                    s.loadAll('album').done(function (playlist_tracks) {
-                        var foo = [];
-                        getPlaylistAlbums(callback, playlist_tracks, 0, foo);
-                    });
-                });
-            });
-        } else {
-            var trigger_promise = new models.Promise();
-            var joined_promises = null;
-            console.log("snapshot length: " + snapshot.length);
-            for (var i = 0; i < snapshot.length; i++) {
-                var album = snapshot[i].album;
-                if (albums_array.indexOf(album) == -1 && (index == 0 || album.uri != last_loaded_uri)) {
-                    albums_array.push(album);
-                    var load_promise = album.load('name', 'artists');
-                    if (joined_promises == null) {
-                        joined_promises = models.Promise.join(trigger_promise, load_promise);
-                    } else {
-                        joined_promises = models.Promise.join(joined_promises, load_promise);
-                    }
-                }
-            }
-            trigger_promise.setDone();
-            console.log("albums found: " + albums_array.length);
-            if (joined_promises) {
-                joined_promises.always(function () {
-                    if (snapshot.length >= 500) {
-                        var playlist = models.Playlist.fromURI(localStorage.album_radio_playlist);
-                        playlist.load('tracks').done(function (tracks) {
-                            playlist.tracks.snapshot(500 * (index + 1), 500).done(function (s) {
-                                console.log('load extra songs: ' + s.length);
-                                s.loadAll('album').done(function (playlist_tracks) {
-                                    getPlaylistAlbums(callback, playlist_tracks, index + 1, albums_array, albums_array[albums_array.length - 1].uri);
-                                });
-                            });
-                        });
-                    } else {
-                        callback(albums_array);
-                    }
-                });
-            }
-            else {
-                callback(albums_array);
-            }
-        }
-    }
 
     function setBackgroundImage(album)
     {
+/*
         var image = Image.forAlbum(album, { width: 800, height: 800 });
         var bg = document.querySelector('#bgImageContainer');
         bg.innerHTML = '';
         image.node.removeAttribute('style');
         bg.appendChild(image.node);
+*/
     }
 
     //don't pass stuff in to this, let it handle the params itself
-    function populateAlbumsBox(snapshot, index, last_loaded_uri) {
-        if (typeof snapshot === "undefined" || !snapshot) {
-            var playlist = models.Playlist.fromURI(localStorage.album_radio_playlist);
-            playlist.load('tracks', 'name').done(function (tracks) {
-                var playlist_name = document.querySelector('#playlist_name');
-                playlist_name.innerHTML = playlist.name;
-                playlist.tracks.snapshot(0, 500).done(function (s) {
-                    s.loadAll('album').done(function (playlist_tracks) {
-                        populateAlbumsBox(playlist_tracks, 0);
-                    });
-                });
-            });
-        } else {
-            if (index == 0) {
-                album_box.innerHTML = '';
-            }
-            var throbber = Throbber.forElement(album_box);
-            var albums_array = [];
-            var trigger_promise = new models.Promise();
-            var joined_promises = null;
-            for (var i = 0; i < snapshot.length; i++) {
-                var album = snapshot[i].album;
-                if (albums_array.indexOf(album) == -1 && (index == 0 || album.uri != last_loaded_uri)) {
-                    albums_array.push(album);
-                    var load_promise = album.load('name', 'artists');
-                    if (joined_promises == null) {
-                        joined_promises = models.Promise.join(trigger_promise, load_promise);
-                    } else {
-                        joined_promises = models.Promise.join(joined_promises, load_promise);
-                    }
-                }
-            }
-            trigger_promise.setDone();
-            console.log("albums found: " + albums_array.length + ", index: " + index);
-            if (joined_promises) {
-                joined_promises.always(function () {
-                    var first_album = (index == 0);
-                    albums_array.forEach(function (album) {
-                        var album_title = album.name + ' by ';
-                        var first = true;
-                        album.artists.forEach(function (a) { if (!first) { album_title += ', '; } first = false; album_title += a.name; });
-                        if (first_album) {
-                            first_album = false;
-                            var image = Image.forAlbum(album, { width: 256, height: 256, title: album_title });
-
-                            var starplus_button = document.createElement('div');
-                            starplus_button.classList.add('starplusr');
-                            starplus_button.title = 'Star current song, follow artist, and add another album from this artist, if available';
-                            starplus_button.onclick = starPlus;
-                            image.node.appendChild(starplus_button);
-
-                            setBackgroundImage(album);
-                        } else {
-                            var image = Image.forAlbum(album, { width: 64, height: 64, title: album_title });
-                        }
-                        var delete_button = document.createElement('div');
-                        delete_button.classList.add('deleter');
-                        delete_button.title = 'Delete This Album';
-                        delete_button.onclick = deleteAlbum;
-                        image.node.appendChild(delete_button);
-
-                        album_box.appendChild(image.node);
-
-                    });
-                    if (snapshot.length >= 500) {
-                        var playlist = models.Playlist.fromURI(localStorage.album_radio_playlist);
-                        playlist.load('tracks').done(function (tracks) {
-                            playlist.tracks.snapshot(500 * (index + 1), 500).done(function (s) {
-                                console.log(index + ' load extra songs: ' + s.length);
-                                //var playlist_count = document.querySelector('#playlist_count');
-                                localStorage.str_num_playlist_songs = s.length;
-                                //playlist_count.innerHTML = s.length + ' tracks';
-                                clock.setValue(s.length);
-                                s.loadAll('album').done(function (playlist_tracks) {
-                                    populateAlbumsBox(playlist_tracks, index + 1, albums_array[albums_array.length - 1].uri);
-                                });
-                            });
-                        });
-                    } else if(index == 0) {
-                        // var playlist_count = document.querySelector('#playlist_count');
-                        clock.setValue(500 * index + snapshot.length);
-                        localStorage.str_num_playlist_songs = (500 * index + snapshot.length);
-                        // playlist_count.innerHTML = localStorage.str_num_playlist_songs + ' tracks';
-                    }
-
-                    throbber.hide();
-                });
-            }
-            else {
-                throbber.hide();
-            }
-        }
-    }
 
     function deletePlayed(playlist, snapshot) {
+/*
         if (snapshot.toArray()[0] != models.player.track) {
             var reload = (snapshot.toArray()[0].album != models.player.track.album);
             playlist.tracks.remove(snapshot.ref(0)).done(function () {
@@ -319,9 +517,11 @@ require([
                 playlist.tracks.snapshot(0, 1).done(function (sn) { deletePlayed(playlist, sn); });
             });
         }
+*/
     }
 
     function addRandomArtistAlbum(artists, playlist, playlist_albums, call_count) {
+/*
         if (typeof playlist === "undefined" || !playlist) {
             playlist = models.Playlist.fromURI(localStorage.album_radio_playlist);
         }
@@ -391,33 +591,19 @@ require([
                 });
             });
         }
+*/
     }
 
     //ENDREGION
 
     //REGION initial setup
-    if (localStorage.album_radio_playlist) {
-        var debug_box = document.querySelector('#debugging');
-        var debug_message = document.createElement('p');
-        debug_message.innerHTML = 'You have a playlist stored in localstorage: ' + localStorage.album_radio_playlist + " - " + new Date().toUTCString();
-        debug_box.appendChild(debug_message);
-        if (debug_box.children.length > 4)
-            debug_box.removeChild(debug_box.children[0]);
-        var allowed_message = document.createElement('p');
-        allowed_message.innerHTML = 'Working with previously stored playlist';
-        document.getElementById('noplaylistmsg').style.display = 'none';
-        drop_box.appendChild(allowed_message);
-        setTimeout(function () {
-            allowed_message.remove();
-        }, 5000);
-        populateAlbumsBox();
-    }
+/*
     // find out initial status of the player
     models.player.load(['context']).done(function (player) {
         if (models.player.context) {
             console.log("currently playing from context (playlist) " + models.player.context.uri);
         }
-        /* Test for Niz on IRC
+        / * Test for Niz on IRC
         models.player.playContext(models.Playlist.fromURI(localStorage.album_radio_playlist));
         setTimeout(function() {
             models.player.pause();
@@ -425,8 +611,9 @@ require([
                 models.player.play();}, 
                 5000);},
             5000);
-            */
+            * /
     });
+*/
     //ENDREGION initial setup
 
     //REGION Stuff for html page
@@ -452,6 +639,7 @@ require([
         console.log(e.target.track);
     });*/	
 
+/*
     models.player.addEventListener('change:track', function (e) {
         if (localStorage.album_radio_playlist) {
             var debug_box = document.querySelector('#debugging');
@@ -462,7 +650,7 @@ require([
                     playlist.tracks.snapshot(0, 500).done(function (playlist_tracks) {
                         if (playlist_tracks.find(models.player.track)) {
                             playlist.tracks.snapshot(0, 1).done(function (sn) { deletePlayed(playlist, sn); });
-                            if (playlist_tracks.length/*-num_deleted*/ <= 500) {
+                            if (playlist_tracks.length/ *-num_deleted* / <= 500) {
                                 //add an album
                                 var artists = [];
                                 if (e.target.duration != 0) {
@@ -501,6 +689,7 @@ require([
             }
         }
     });
+*/
 
     /* from  http://stackoverflow.com/questions/19761821/return-top-track-spotify-api
     keeping around for future toplist access
@@ -556,8 +745,10 @@ require([
     showRelated();
     */
 
+/*
 }
 );
+*/
 
 
 /* for http://stackoverflow.com/questions/19763090/spotify-app-fire-function-on-change-position

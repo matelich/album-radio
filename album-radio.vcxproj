@@ -78,8 +78,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="css\normalize.css" />
     <None Include="index.html" />
     <None Include="css\main.css" />
+    <None Include="js\rdio-utils.js" />
     <None Include="oldindex.html" />
     <None Include="js\albumradio.js" />
     <None Include="js\jquery.min.js" />

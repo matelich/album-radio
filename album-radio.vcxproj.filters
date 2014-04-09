@@ -33,6 +33,12 @@
     <None Include="index.html" />
     <None Include="README.md" />
     <None Include="Proposal.md" />
+    <None Include="css\normalize.css">
+      <Filter>css</Filter>
+    </None>
+    <None Include="js\rdio-utils.js">
+      <Filter>js</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Image Include="albumradio.png" />
