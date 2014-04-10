@@ -49,7 +49,6 @@
                     console.log(self.currentUserKey);
 */
                     $("#unauthorized").toggle(false);
-                    console.log(R.currentUser);
                     if (localStorage.lastUser == R.currentUser.get('key') && localStorage.album_radio_playlist != null) {
                         self.loadPlaylist();
                     } else {
@@ -117,6 +116,42 @@
         },
         
         populateAlbumsBox: function (snapshot, index, last_loaded_uri) {
+            var album_box = document.getElementById('album_box');
+            album_box.innerHTML = '';
+            R.request({
+                method: 'get',
+                content: {
+                    keys: localStorage.album_radio_playlist,
+                    extras: '[{"field": "tracks", "extras": ["-*","albumKey"]}]'
+                },
+                success: function (data) {
+                    //var $info = self.template('playlist-info', data.result).appendTo('.albums');
+
+                    var key_counts = _.countBy(data.result[localStorage.album_radio_playlist].tracks, function (t) {
+                        return t.albumKey;
+                    });
+                    console.log(key_counts);
+                    var just_keys = _.keys(key_counts);
+                    console.log(just_keys);
+
+                    R.request({
+                        method: 'get',
+                        content: {
+                            keys: just_keys.join(','),
+                            extras: '-*,icon,name,artist,url,artistUrl,length,key'
+                        },
+                        success: function (data) {
+                            console.log(data.result);
+                            _.each(key_counts, function (v, k) {
+                                var widget = rdioUtils.albumWidget(data.result[k]);
+                                //var $widget = $(widget.element());
+                                album_box.appendChild(widget._element);
+                            });
+                        }
+                    });
+                }
+            });
+
         /*
                 if (typeof snapshot === "undefined" || !snapshot) {
                     var playlist = models.Playlist.fromURI(localStorage.album_radio_playlist);
