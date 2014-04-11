@@ -113,9 +113,71 @@
                 allowed_message.remove();
             }, 5000);
             self.populateAlbumsBox();
+            R.player.on('change:playingTrack', self.trackChanged, self);
+            self.trackChanged();
         },
-        
+
+        trackChanged: function() {
+            var self = this;
+            if (localStorage.album_radio_playlist == R.player.playingSource().get("key")) {
+                console.log('Played a song from your playlist - trimming start of playlist');
+                //todo: only get the first X songs
+                R.request({
+                    method: 'get',
+                    content: {
+                        keys: localStorage.album_radio_playlist,
+                        extras: '[{"field": "tracks", "extras": ["-*","key","albumkey"]}]'
+                    },
+                    success: function (data) {
+                        //console.log(data.result);data.result[localStorage.album_radio_playlist].tracks
+                        var tracks = data.result[localStorage.album_radio_playlist].tracks;
+                        var curr_song = R.player.playingTrack().get("key");
+                        var curr_album = R.player.playingTrack().get("albumKey");
+                        var need_album_refresh = false;
+                        var num_songs = data.result[localStorage.album_radio_playlist].length;
+                        var keys = [];
+                        for (var i = 0, l = tracks.length; i < l; i++) {
+                            if (tracks[i].key === curr_song) {
+                                break;
+                            }
+                            if (tracks[i].albumKey != curr_album) {
+                                need_album_refresh = true;
+                            }
+                            keys.push(tracks[i].key);
+                        }
+                        console.log("currently playing index " + i);
+                        if(i > 0)
+                        {
+                            R.request({
+                                method: 'removeFromPlaylist',
+                                content: {
+                                    playlist: localStorage.album_radio_playlist,
+                                    index: 0,
+                                    count: keys.length,
+                                    tracks: keys.join(',')
+                                },
+                                success: function (data) {
+                                    console.log("yay, deleted songs");
+                                    num_songs -= keys.length;
+                                    clock.setValue(num_songs);
+                                    /*if (num_songs <= 500) {
+                                    add a new album
+                                    } else*/ if (need_album_refresh) {
+                                        self.populateAlbumsBox();
+                                    }
+                                },
+                                error: function (response) {
+                                    console.log("error: " + response.message);
+                                }
+                            });
+                        }
+                    }
+                });
+            }
+        },
+
         populateAlbumsBox: function (snapshot, index, last_loaded_uri) {
+            console.log("populating album box");
             var album_box = document.getElementById('album_box');
             album_box.innerHTML = '';
             R.request({
@@ -126,13 +188,15 @@
                 },
                 success: function (data) {
                     //var $info = self.template('playlist-info', data.result).appendTo('.albums');
+                    var num_songs = data.result[localStorage.album_radio_playlist].length;
+                    clock.setValue(num_songs);
 
                     var key_counts = _.countBy(data.result[localStorage.album_radio_playlist].tracks, function (t) {
                         return t.albumKey;
                     });
-                    console.log(key_counts);
+                    //console.log(key_counts);
                     var just_keys = _.keys(key_counts);
-                    console.log(just_keys);
+                    //console.log(just_keys);
 
                     R.request({
                         method: 'get',
@@ -141,7 +205,7 @@
                             extras: '-*,icon,name,artist,url,artistUrl,length,key'
                         },
                         success: function (data) {
-                            console.log(data.result);
+                            //console.log(data.result);
                             _.each(key_counts, function (v, k) {
                                 var widget = rdioUtils.albumWidget(data.result[k]);
                                 //var $widget = $(widget.element());

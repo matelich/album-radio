@@ -36,9 +36,9 @@
 </head>
 <body>
     <div id="bgImageContainer" class="lightbg">
-        <div about='http://farm8.static.flickr.com/7065/6906906289_8264b19786_m.jpg'>
+        <div about='http://farm8.static.flickr.com/7065/6906906289_8264b19786_m.jpg' class="sp-image">
             <a href='http://www.flickr.com/photos/27587002@N07/6906906289/' target='_blank'>
-                <img xmlns:dct='http://purl.org/dc/terms/' href='http://purl.org/dc/dcmitype/StillImage' rel='dct:type' src='img/default_album.png' alt='Music by jonkriz, on Flickr' title='Music by jonkriz, on Flickr' border='0' /></a>
+                <img class="sp-image" xmlns:dct='http://purl.org/dc/terms/' href='http://purl.org/dc/dcmitype/StillImage' rel='dct:type' src='img/default_album.png' alt='Music by jonkriz, on Flickr' title='Music by jonkriz, on Flickr' border='0' /></a>
             <br />
             <a rel='license' href='http://creativecommons.org/licenses/by/2.0/' target='_blank'>
                 <img src='http://i.creativecommons.org/l/by/2.0/80x15.png' alt='Creative Commons Attribution 2.0 Generic License' title='Creative Commons Attribution 2.0 Generic License' border='0' align='left'></a>&nbsp;&nbsp;by&nbsp;<a href='http://www.flickr.com/people/27587002@N07/' target='_blank'>&nbsp;</a>
@@ -52,18 +52,16 @@
         <div>
             <div>A few things you should know before you get started - <a class="readmore" href="#">Show</a></div>
             <ol class="hide">
-                <li>This app can only work while you're here (and for 60 seconds after you leave)
-                <ul>
-                    <li>You can use this to your advantage, if you don't know if you want artists related to this artist added</li>
-                </ul>
-                </li>
                 <li>You can only operate the radio on your own playlists, and you need to create one for me yourself along with one or more songs.
                 <ul>
                     <li>It's recommended to take a few songs from favorite artists to initially populate the playlist</li>
                     <li>You can switch between multiple playlists, just drag them to the playlist box below</li>
                 </ul>
                 </li>
-                <li>Album Radio deletes played songs from the start of your playlist
+                <li>Album Radio deletes played songs from the start of your playlist.  Every time a track changes, Album Radio checks to see if there are less than 500 songs in your playlist. If so, it will add an album to the end.  If you skipped a track, the artist will be selected from your Collection, otherwise an artist will be chosen from the completed songs' related artists.
+                <ul>
+                    <li>Album Radio can only detect song skipping if it is managing the playback</li>
+                </ul>
                 </li>
             </ol>
         </div>

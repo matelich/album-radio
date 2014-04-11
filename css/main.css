@@ -6,6 +6,8 @@ body {min-height: 100%; margin:0px;}
     height: 100%;
     width: 100%;
     -webkit-transition:-webkit-filter 0.4s ease-in-out;   
+    background-color: #704214;
+    padding: 10px;
 }
 
 .lightbg {
@@ -25,8 +27,8 @@ body {min-height: 100%; margin:0px;}
 }
 
 #bgImageContainer .sp-image {
-    width: 100%;
-    height: 100%;
+    width: 99%;
+    /*height: 100%;*/
 }
 
 .section {position: relative;overflow: hidden;z-index:10; padding: 10px 10px 20px; }
