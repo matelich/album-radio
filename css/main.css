@@ -13,7 +13,13 @@ body {min-height: 100%; margin:0px;}
 .lightbg {
     /* don't forget to use the prefixes you need */
     z-index: 0;
+    filter: gray; /* IE6-9 */
+    opacity:.3;
     -webkit-filter: grayscale(1) opacity(0.3) sepia(0.9);
+    -moz-filter: grayscale(100%) opacity(30%) sepia(90%);
+    -ms-filter: grayscale(100%) opacity(30%) sepia(90%);
+    -o-filter: grayscale(100%) opacity(30%) sepia(90%);
+    filter: grayscale(100%) opacity(30%) sepia(90%);
 }
 .frontsalot {
     z-index: 100;
