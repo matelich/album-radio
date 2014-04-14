@@ -126,7 +126,7 @@
                     method: 'get',
                     content: {
                         keys: localStorage.album_radio_playlist,
-                        extras: '[{"field": "tracks", "extras": ["-*","key","albumkey"]}]'
+                        extras: '[{"field": "tracks", "extras": ["-*","key","albumKey"]}]'
                     },
                     success: function (data) {
                         //console.log(data.result);data.result[localStorage.album_radio_playlist].tracks
@@ -141,6 +141,7 @@
                                 break;
                             }
                             if (tracks[i].albumKey != curr_album) {
+                                console.log(tracks[i].albumKey + " != " + curr_album);
                                 need_album_refresh = true;
                             }
                             keys.push(tracks[i].key);
