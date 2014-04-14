@@ -4,6 +4,14 @@
 		"selected_items":
 		[
 			[
+				"time",
+				"timetext"
+			],
+			[
+				"tim",
+				"timetext"
+			],
+			[
 				"play",
 				"playlist_count"
 			],
@@ -16,42 +24,22 @@
 	"buffers":
 	[
 		{
-			"file": "js/albumradio.js",
+			"file": "/C/Users/sara/Documents/GitHub/cool-times/index.html",
 			"settings":
 			{
-				"buffer_size": 29400,
-				"line_ending": "Windows"
+				"buffer_size": 1401,
+				"line_ending": "Windows",
+				"name": "<!DOCTYPE html>"
 			}
 		},
 		{
-			"file": "js/flipclock/faces/counter.js",
+			"contents": "\n\n$(document).ready(function() {\n/*		var clock = $('#mainclock').FlipClock({\n			clockFace: 'TwelveHourClock'\n		});\n		clock.setTime(1234);\n*/\n	var d = new Date();\n	var timetext = d.getHours()+1 + ':';\n	var min = d.getMinutes()+1;\n	if(min < 10) { timetext += '0';}\n	timetext += min;\n	console.log( timetext );\n	var mainclock = document.getElementById(\"mainclock\");\n	mainclock.innerHTML = timetext;\n});",
+			"file": "/C/Users/sara/Documents/GitHub/cool-times/js/cooltime.js",
+			"file_size": 410,
+			"file_write_time": 130363928551898058,
 			"settings":
 			{
-				"buffer_size": 1899,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "js/flipclock/flipclock.js",
-			"settings":
-			{
-				"buffer_size": 26686,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "index.html",
-			"settings":
-			{
-				"buffer_size": 3105,
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "css/main.css",
-			"settings":
-			{
-				"buffer_size": 1870,
+				"buffer_size": 398,
 				"line_ending": "Windows"
 			}
 		}
@@ -80,6 +68,14 @@
 	},
 	"file_history":
 	[
+		"/C/Users/sara/Documents/Spotify/album-radio/index.html",
+		"/C/Users/sara/Documents/Spotify/album-radio/js/albumradio.js",
+		"/C/Users/sara/Documents/GitHub/cool-times/js/flipclock/flipclock.js",
+		"/C/Users/sara/Documents/GitHub/cool-times/readme.md",
+		"/C/Users/sara/Documents/GitHub/cool-times/cooltime.js",
+		"/C/Users/sara/Documents/Spotify/album-radio/css/main.css",
+		"/C/Users/sara/Documents/Spotify/album-radio/js/flipclock/flipclock.js",
+		"/C/Users/sara/Documents/Spotify/album-radio/js/flipclock/faces/counter.js"
 	],
 	"find":
 	{
@@ -97,6 +93,9 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"\n    ",
+			"clock",
+			"===",
 			"playlist_count",
 			"increment",
 			"console.log",
@@ -118,15 +117,44 @@
 	"groups":
 	[
 		{
-			"selected": 4,
+			"selected": 1,
 			"sheets":
 			[
 				{
 					"buffer": 0,
-					"file": "js/albumradio.js",
+					"file": "/C/Users/sara/Documents/GitHub/cool-times/index.html",
 					"settings":
 					{
-						"buffer_size": 29400,
+						"buffer_size": 1401,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								840,
+								840
+							]
+						],
+						"settings":
+						{
+							"auto_name": "<!DOCTYPE html>",
+							"syntax": "Packages/HTML/HTML.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "/C/Users/sara/Documents/GitHub/cool-times/js/cooltime.js",
+					"settings":
+					{
+						"buffer_size": 398,
 						"regions":
 						{
 						},
@@ -139,119 +167,7 @@
 						],
 						"settings":
 						{
-							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 45.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 1,
-					"file": "js/flipclock/faces/counter.js",
-					"settings":
-					{
-						"buffer_size": 1899,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								1899,
-								1899
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 110.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 2,
-					"file": "js/flipclock/flipclock.js",
-					"settings":
-					{
-						"buffer_size": 26686,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								924,
-								924
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 30.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 3,
-					"file": "index.html",
-					"settings":
-					{
-						"buffer_size": 3105,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								2457,
-								2457
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/HTML/HTML.tmLanguage",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 480.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 4,
-					"file": "css/main.css",
-					"settings":
-					{
-						"buffer_size": 1870,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								511,
-								511
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/CSS/CSS.tmLanguage",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage"
 						},
 						"translation.x": 0.0,
 						"translation.y": 0.0,
