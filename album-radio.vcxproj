@@ -79,6 +79,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="css\normalize.css" />
+    <None Include="css\rdio-utils.css" />
     <None Include="index.html" />
     <None Include="css\main.css" />
     <None Include="js\rdio-utils.js" />
@@ -96,6 +97,7 @@
     <Image Include="albumradio.png" />
     <Image Include="albumradio32.png" />
     <Image Include="albumradio64.png" />
+    <Image Include="favicon.ico" />
     <Image Include="img\remove.png" />
     <Image Include="img\starplus.png" />
   </ItemGroup>

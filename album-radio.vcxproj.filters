@@ -39,6 +39,9 @@
     <None Include="js\rdio-utils.js">
       <Filter>js</Filter>
     </None>
+    <None Include="css\rdio-utils.css">
+      <Filter>css</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Image Include="albumradio.png" />
@@ -50,5 +53,6 @@
     <Image Include="img\remove.png">
       <Filter>img</Filter>
     </Image>
+    <Image Include="favicon.ico" />
   </ItemGroup>
 </Project>

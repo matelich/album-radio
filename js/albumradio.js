@@ -178,6 +178,7 @@
         },
 
         populateAlbumsBox: function (snapshot, index, last_loaded_uri) {
+            var self = this;
             console.log("populating album box");
             var album_box = document.getElementById('album_box');
             album_box.innerHTML = '';
@@ -208,9 +209,9 @@
                         success: function (data) {
                             //console.log(data.result);
                             _.each(key_counts, function (v, k) {
-                                var widget = rdioUtils.albumWidget(data.result[k]);
+                                var widget = self.albumWidget(data.result[k], v);
                                 //var $widget = $(widget.element());
-                                album_box.appendChild(widget._element);
+                                album_box.appendChild(widget);
                             });
                         }
                     });
@@ -310,6 +311,88 @@
                     }
                 }
         */
+        },
+
+        albumWidget: function (album, num_left) {
+            var _element = document.createElement('div');
+            _element.className = 'ar-album';
+
+            var _broken = false;
+
+            if (album) {
+                if (album.key && !/^(a|al)[0-9]/.test(album.key)) {
+                    console.log('Bad key for album widget: ' + album.key);
+                    _broken = true;
+                }
+                var required = ['url', 'icon', 'name', 'artist', 'artistUrl', 'key'];
+                for (i = 0; i < required.length; i++) {
+                    if (!album[required[i]]) {
+                        console.log('Missing ' + required[i] + ' for album widget', album);
+                        _broken = true;
+                    }
+                }
+            } else {
+                console.log('Album is required for album widget');
+                _broken = true;
+            }
+
+            if (_broken) {
+                _element.innerHTML = ''
+                + '<div class="album-cover">'
+                + '<div class="album-icon"></div>'
+                + '</div>'
+                + '<div class="album-title truncated">Unknown Album</div>'
+                + '<div class="album-author truncated">&nbsp;</div>'
+                + '<div class="album-size truncated">&nbsp;</div>';
+            } else {
+                var html = ''
+                + '<div class="album-cover">'
+                + '<a href="http://www.rdio.com' + rdioUtils._escape(album.url) + '">'
+                + '<div class="album-icon" style="background-image: url(' + rdioUtils._escape(album.icon) + ')"></div>'
+                //+ '<div class="album-hover-overlay">'
+                //+ '<div class="album-play-btn"></div>'
+                // + '<div class="album-action-btn"></div>'
+                + '</div>'
+                + '</a>'
+                + '</div>'
+                //+ '<div class="album-title truncated"><a href="http://www.rdio.com' + rdioUtils._escape(album.url) + '">' + rdioUtils._escape(album.name) + '</a></div>'
+                //+ '<div class="album-author truncated"><a href="http://www.rdio.com' + rdioUtils._escape(album.artistUrl) + '">' + rdioUtils._escape(album.artist) + '</a></div>'
+                ;
+
+                if (album.length) {
+                    //html += '<div class="album-size truncated">'
+                    //+ rdioUtils._escape(album.length) + ' songs</div>';
+                    html += '<progress class="bottomright" value="' + (album.length - num_left) + '" max="' + album.length + '">';
+                }
+
+                _element.innerHTML = html;
+
+                /*
+                            var links = _element.getElementsByTagName('a');
+                            for (i = 0; i < links.length; i++) {
+                                rdioUtils._bind(links[i], 'click', linkClickHandler);
+                            }
+                */
+
+/*
+                var button = _element.getElementsByClassName('album-play-btn')[0];
+                rdioUtils._bind(button, 'click', function (event) {
+                    rdioUtils._stopEvent(event);
+
+                    if (event.altKey || event.metaKey) {
+                        R.player.queue.addPlayingSource();
+                    }
+                    R.player.play({ source: album.key });
+                });
+*/
+
+                // button = this._element.getElementsByClassName('album-action-btn')[0];
+                // rdioUtils._bind(button, 'click', function(event) {
+                //   self._openActionMenu();
+                // });
+            }
+
+            return _element;
         },
 
         getPlaylistAlbums: function (callback, snapshot, index, albums_array, last_loaded_uri) {
