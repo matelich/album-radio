@@ -63,6 +63,8 @@ div.killscroll div {
 #player .sp-list {width:inherit;max-height:inherit;}
 
 .ar-album { float:left; position:relative; }
+.ar-big-album { width: 256px; height: 256px; }
+.ar-small-album { width: 64px; height: 64px; }
 
 progress[value] {
   /* Reset the default appearance */
@@ -110,13 +112,14 @@ progress[value]::-webkit-progress-bar {
     right: 0px;
     padding: 4px;
     background-color: rgba(189, 79, 79, 0.51);
-    background-image: url('/img/remove.png');
+    background-image: url('../img/remove.png');
     background-repeat: no-repeat;
     z-index: 9999;
     color: rgb(100, 0, 0);
     width: 20px;
     height: 20px;
     background-position: center;
+    cursor: pointer;
 }
 
 .starplusr {
@@ -126,7 +129,7 @@ progress[value]::-webkit-progress-bar {
     padding: 4px;
     z-index: 9999;
     background-color: rgba(255, 165, 48, 0.51);
-    background-image:url('/img/starplus.png');
+    background-image:url('../img/starplus.png');
     background-repeat: no-repeat;
     width:36px;
     height:36px;
@@ -180,8 +183,8 @@ progress[value]::-webkit-progress-bar {
   text-decoration: underline;
 }
 .album-icon {
-  width: 200px;
-  height: 200px;
+  width: 100%;
+  height: 100%;
   border: 1px solid rgba(0, 0, 0, 0.1);
   background-repeat: no-repeat;
   background-size: contain;
@@ -199,6 +202,8 @@ progress[value]::-webkit-progress-bar {
 }
 .album-cover {
   position: relative;
+  width: 100%;
+  height: 100%;
 }
 .album-cover:hover .album-hover-overlay {
   display: block;

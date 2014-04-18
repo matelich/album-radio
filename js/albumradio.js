@@ -161,10 +161,16 @@
                                     console.log("yay, deleted songs");
                                     num_songs -= keys.length;
                                     clock.setValue(num_songs);
+
+
                                     /*if (num_songs <= 500) {
                                     add a new album
                                     } else*/ if (need_album_refresh) {
                                         self.populateAlbumsBox();
+                                    } else {
+                                        var album_box = document.getElementById('album_box');
+                                        var progressbar = album_box.firstChild.getElementsByTagName('progress')[0];
+                                        progressbar.value = progressbar.value + keys.length;
                                     }
                                 },
                                 error: function (response) {
@@ -204,14 +210,29 @@
                         method: 'get',
                         content: {
                             keys: just_keys.join(','),
-                            extras: '-*,icon,name,artist,url,artistUrl,length,key'
+                            extras: '-*,icon,name,artist,url,artistUrl,length,key,bigIcon'
                         },
                         success: function (data) {
                             //console.log(data.result);
+                            var first_album = true;
                             _.each(key_counts, function (v, k) {
-                                var widget = self.albumWidget(data.result[k], v);
-                                //var $widget = $(widget.element());
+                                var album = data.result[k];
+                                var widget = self.albumWidget(album, v, first_album);
                                 album_box.appendChild(widget);
+                                if (first_album) {
+                                    var bg = document.querySelector('#bgImageContainer');
+                                    bg.innerHTML = '<img class="sp-image" src="'+album.bigIcon+'" alt="large artwork" border="0"/>';
+
+/*
+                                    var starplus_button = document.createElement('div');
+                                    starplus_button.classList.add('starplusr');
+                                    starplus_button.title = 'Star current song, follow artist, and add another album from this artist, if available';
+                                    starplus_button.onclick = starPlus;
+                                    image.node.appendChild(starplus_button);
+*/
+
+                                    first_album = false;
+                                }
                             });
                         }
                     });
@@ -313,9 +334,10 @@
         */
         },
 
-        albumWidget: function (album, num_left) {
+        albumWidget: function (album, num_left, first) {
+            var self = this;
             var _element = document.createElement('div');
-            _element.className = 'ar-album';
+            _element.className = first ? 'ar-album ar-big-album' : 'ar-album ar-small-album';
 
             var _broken = false;
 
@@ -355,17 +377,28 @@
                 + '</div>'
                 + '</a>'
                 + '</div>'
+                + '<div class="deleter" title="Delete This Album (not functional yet)"></div>'
                 //+ '<div class="album-title truncated"><a href="http://www.rdio.com' + rdioUtils._escape(album.url) + '">' + rdioUtils._escape(album.name) + '</a></div>'
                 //+ '<div class="album-author truncated"><a href="http://www.rdio.com' + rdioUtils._escape(album.artistUrl) + '">' + rdioUtils._escape(album.artist) + '</a></div>'
                 ;
 
-                if (album.length) {
+                if (album.length && first) {
                     //html += '<div class="album-size truncated">'
                     //+ rdioUtils._escape(album.length) + ' songs</div>';
-                    html += '<progress class="bottomright" value="' + (album.length - num_left) + '" max="' + album.length + '">';
+                    var num = album.length - num_left;
+                    if (num < 0)
+                        num = 0;
+                    html += '<progress class="bottomright" value="' + num + '" max="' + album.length + '">';
                 }
 
                 _element.innerHTML = html;
+
+                var delete_button = _element.getElementsByClassName('deleter')[0];
+                rdioUtils._bind(delete_button, 'click', function (event)
+                {
+                    rdioUtils._stopEvent(event);
+                    self.deleteAlbum(album.key);
+                });
 
                 /*
                             var links = _element.getElementsByTagName('a');
@@ -393,6 +426,10 @@
             }
 
             return _element;
+        },
+
+        deleteAlbum: function (albumkey) {
+            console.log('kill ' + albumkey);
         },
 
         getPlaylistAlbums: function (callback, snapshot, index, albums_array, last_loaded_uri) {
