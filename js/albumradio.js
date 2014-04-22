@@ -183,7 +183,7 @@
             }
         },
 
-        populateAlbumsBox: function (snapshot, index, last_loaded_uri) {
+        populateAlbumsBox: function () {
             var self = this;
             console.log("populating album box");
             var album_box = document.getElementById('album_box');
@@ -377,7 +377,7 @@
                 + '</div>'
                 + '</a>'
                 + '</div>'
-                + '<div class="deleter" title="Delete This Album (not functional yet)"></div>'
+                + '<div class="deleter" title="Delete This Album"></div>'
                 //+ '<div class="album-title truncated"><a href="http://www.rdio.com' + rdioUtils._escape(album.url) + '">' + rdioUtils._escape(album.name) + '</a></div>'
                 //+ '<div class="album-author truncated"><a href="http://www.rdio.com' + rdioUtils._escape(album.artistUrl) + '">' + rdioUtils._escape(album.artist) + '</a></div>'
                 ;
@@ -429,7 +429,54 @@
         },
 
         deleteAlbum: function (albumkey) {
+            var self = this;
             console.log('kill ' + albumkey);
+            R.request({
+                method: 'get',
+                content: {
+                    keys: localStorage.album_radio_playlist,
+                    extras: '[{"field": "tracks", "extras": ["-*","key","albumKey"]}]'
+                },
+                success: function (data) {
+                    var tracks = data.result[localStorage.album_radio_playlist].tracks;
+                    var keys = [];
+                    var found_album = false;
+                    var start_index = -1;
+                    for (var i = 0, l = tracks.length; i < l; i++) {
+                        if (found_album && tracks[i].albumKey != albumkey) {
+                            break;
+                        }
+                        if (tracks[i].albumKey === albumkey) {
+                            if (!found_album) {
+                                found_album = true;
+                                start_index = i;
+                            }
+                            keys.push(tracks[i].key);
+                        }
+                    }
+                    if (found_album) {
+                        R.request({
+                            method: 'removeFromPlaylist',
+                            content: {
+                                playlist: localStorage.album_radio_playlist,
+                                index: start_index,
+                                count: keys.length,
+                                tracks: keys.join(',')
+                            },
+                            success: function (data) {
+                                console.log("yay, deleted "+keys.length+" songs for album " + albumkey);
+                                self.populateAlbumsBox();
+                                if (start_index == 0) {
+                                    //looks like the player auto-skips when the song is deleted R.player.next();
+                                }
+                            },
+                            error: function (data) {
+                                console.log("boo - " + data);
+                            }
+                        });
+                    }
+                }
+            });
         },
 
         getPlaylistAlbums: function (callback, snapshot, index, albums_array, last_loaded_uri) {
