@@ -202,56 +202,47 @@
             console.log("populating album box");
             var album_box = document.getElementById('album_box');
             album_box.innerHTML = '';
+            
+            var player_source_playlist = R.player.playingSource();
+            var tracks = player_source_playlist.get("tracks");
+            var key_counts = _.countBy(tracks.models, function (t) {
+                return t.get("albumKey");
+            });
+            console.log(key_counts);
+            var just_keys = _.keys(key_counts);
+            //console.log(just_keys);
+
             R.request({
                 method: 'get',
                 content: {
-                    keys: localStorage.album_radio_playlist,
-                    extras: '[{"field": "tracks", "extras": ["-*","albumKey"]}]'
+                    keys: just_keys.join(','),
+                    extras: '-*,icon,name,artist,url,artistUrl,length,key,bigIcon'
                 },
                 success: function (data) {
-                    //var $info = self.template('playlist-info', data.result).appendTo('.albums');
-                    var num_songs = data.result[localStorage.album_radio_playlist].length;
-                    clock.setValue(num_songs);
+                    //console.log(data.result);
+                    var first_album = true;
+                    _.each(key_counts, function (v, k) {
+                        var album = data.result[k];
+                        var widget = self.albumWidget(album, v, first_album);
+                        album_box.appendChild(widget);
+                        if (first_album) {
+                            var bg = document.querySelector('#bgImageContainer');
+                            bg.innerHTML = '<img class="sp-image" src="'+album.bigIcon+'" alt="large artwork" border="0"/>';
 
-                    var key_counts = _.countBy(data.result[localStorage.album_radio_playlist].tracks, function (t) {
-                        return t.albumKey;
-                    });
-                    //console.log(key_counts);
-                    var just_keys = _.keys(key_counts);
-                    //console.log(just_keys);
+                            /*
+                            var starplus_button = document.createElement('div');
+                            starplus_button.classList.add('starplusr');
+                            starplus_button.title = 'Star current song, follow artist, and add another album from this artist, if available';
+                            starplus_button.onclick = starPlus;
+                            image.node.appendChild(starplus_button);
+                            */
 
-                    R.request({
-                        method: 'get',
-                        content: {
-                            keys: just_keys.join(','),
-                            extras: '-*,icon,name,artist,url,artistUrl,length,key,bigIcon'
-                        },
-                        success: function (data) {
-                            //console.log(data.result);
-                            var first_album = true;
-                            _.each(key_counts, function (v, k) {
-                                var album = data.result[k];
-                                var widget = self.albumWidget(album, v, first_album);
-                                album_box.appendChild(widget);
-                                if (first_album) {
-                                    var bg = document.querySelector('#bgImageContainer');
-                                    bg.innerHTML = '<img class="sp-image" src="'+album.bigIcon+'" alt="large artwork" border="0"/>';
-
-/*
-                                    var starplus_button = document.createElement('div');
-                                    starplus_button.classList.add('starplusr');
-                                    starplus_button.title = 'Star current song, follow artist, and add another album from this artist, if available';
-                                    starplus_button.onclick = starPlus;
-                                    image.node.appendChild(starplus_button);
-*/
-
-                                    first_album = false;
-                                }
-                            });
+                            first_album = false;
                         }
                     });
                 }
             });
+        
 
         /*
                 if (typeof snapshot === "undefined" || !snapshot) {
