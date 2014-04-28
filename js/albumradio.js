@@ -119,6 +119,7 @@
 
         trackChanged: function() {
             var self = this;
+            var debug_box = document.querySelector('#debugging');
             if (localStorage.album_radio_playlist == R.player.playingSource().get("key")) {
                 console.log('Played a song from your playlist - trimming start of playlist');
                 //todo: only get the first X songs
@@ -135,6 +136,9 @@
                         var curr_album = R.player.playingTrack().get("albumKey");
                         var need_album_refresh = false;
                         var num_songs = data.result[localStorage.album_radio_playlist].length;
+                        if (num_songs > clock.getTime()) {
+                            need_album_refresh = true;
+                        }
                         var keys = [];
                         for (var i = 0, l = tracks.length; i < l; i++) {
                             if (tracks[i].key === curr_song) {
@@ -147,8 +151,22 @@
                             keys.push(tracks[i].key);
                         }
                         console.log("currently playing index " + i);
-                        if(i > 0)
-                        {
+                        if(i > 0) {
+                            if (i > 1) {
+                                console.log("possible bug?");
+                                console.log(curr_song);
+                                console.log(R.player.playingTrack().get("key"));
+                                console.log("would have deleted " + keys.join(','));
+                                var debug_message = document.createElement('p');
+                                debug_message.innerHTML = 'Did not delete finished song due to possible bug.  Please manually delete played songs from your playlist on Rdio';
+                                debug_box.appendChild(debug_message);
+                                if (debug_box.children.length > 4)
+                                    debug_box.removeChild(debug_box.children[0]);
+                                if (need_album_refresh) {
+                                    self.populateAlbumsBox();
+                                }
+                                return;
+                            }
                             R.request({
                                 method: 'removeFromPlaylist',
                                 content: {
@@ -177,6 +195,10 @@
                                     console.log("error: " + response.message);
                                 }
                             });
+                        } else {
+                            if (need_album_refresh) {
+                                self.populateAlbumsBox();
+                            }
                         }
                     }
                 });
@@ -605,6 +627,16 @@
                       Main.authenticated();
                   }
               });
+/*
+              R.authenticate({
+                  linkshareId: 'foo',
+                  complete: function (authenticated) {
+                      if (authenticated) {
+                          Main.authenticated();
+                      }
+                  }
+              });
+*/
           });
     //};
 
