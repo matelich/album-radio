@@ -112,7 +112,6 @@
             setTimeout(function () {
                 allowed_message.remove();
             }, 5000);
-            self.populateAlbumsBox();
             R.player.on('change:playingTrack', self.trackChanged, self);
             self.trackChanged();
         },
@@ -122,86 +121,79 @@
             var debug_box = document.querySelector('#debugging');
             if (localStorage.album_radio_playlist == R.player.playingSource().get("key")) {
                 console.log('Played a song from your playlist - trimming start of playlist');
-                //todo: only get the first X songs
-                R.request({
-                    method: 'get',
-                    content: {
-                        keys: localStorage.album_radio_playlist,
-                        extras: '[{"field": "tracks", "extras": ["-*","key","albumKey"]}]'
-                    },
-                    success: function (data) {
-                        //console.log(data.result);data.result[localStorage.album_radio_playlist].tracks
-                        var tracks = data.result[localStorage.album_radio_playlist].tracks;
-                        var curr_song = R.player.playingTrack().get("key");
-                        var curr_album = R.player.playingTrack().get("albumKey");
-                        var need_album_refresh = false;
-                        var num_songs = data.result[localStorage.album_radio_playlist].length;
-                        if (num_songs > clock.getTime()) {
-                            need_album_refresh = true;
-                        }
-                        var keys = [];
-                        for (var i = 0, l = tracks.length; i < l; i++) {
-                            if (tracks[i].key === curr_song) {
-                                break;
-                            }
-                            if (tracks[i].albumKey != curr_album) {
-                                console.log(tracks[i].albumKey + " != " + curr_album);
-                                need_album_refresh = true;
-                            }
-                            keys.push(tracks[i].key);
-                        }
-                        console.log("currently playing index " + i);
-                        if(i > 0) {
-                            if (i > 1) {
-                                console.log("possible bug?");
-                                console.log(curr_song);
-                                console.log(R.player.playingTrack().get("key"));
-                                console.log("would have deleted " + keys.join(','));
-                                var debug_message = document.createElement('p');
-                                debug_message.innerHTML = 'Did not delete finished song due to possible bug.  Please manually delete played songs from your playlist on Rdio';
-                                debug_box.appendChild(debug_message);
-                                if (debug_box.children.length > 4)
-                                    debug_box.removeChild(debug_box.children[0]);
-                                if (need_album_refresh) {
-                                    self.populateAlbumsBox();
-                                }
-                                return;
-                            }
-                            R.request({
-                                method: 'removeFromPlaylist',
-                                content: {
-                                    playlist: localStorage.album_radio_playlist,
-                                    index: 0,
-                                    count: keys.length,
-                                    tracks: keys.join(',')
-                                },
-                                success: function (data) {
-                                    console.log("yay, deleted songs");
-                                    num_songs -= keys.length;
-                                    clock.setValue(num_songs);
-
-
-                                    /*if (num_songs <= 500) {
-                                    add a new album
-                                    } else*/ if (need_album_refresh) {
-                                        self.populateAlbumsBox();
-                                    } else {
-                                        var album_box = document.getElementById('album_box');
-                                        var progressbar = album_box.firstChild.getElementsByTagName('progress')[0];
-                                        progressbar.value = progressbar.value + keys.length;
-                                    }
-                                },
-                                error: function (response) {
-                                    console.log("error: " + response.message);
-                                }
-                            });
-                        } else {
-                            if (need_album_refresh) {
-                                self.populateAlbumsBox();
-                            }
-                        }
+                var player_source_playlist = R.player.playingSource();
+                var tracks = player_source_playlist.get("tracks");
+                var curr_song = R.player.playingTrack().get("key");
+                var curr_album = R.player.playingTrack().get("albumKey");
+                var need_album_refresh = false;
+                var num_songs = tracks.length;
+                if (num_songs > clock.getTime()) {
+                    need_album_refresh = true;
+                }
+                var keys = [];
+                for (var i = 0, l = tracks.length; i < l; i++) {
+                    var track = tracks.at(i);
+                    var trackkey = track.get("key");
+                    if (trackkey === curr_song) {
+                        break;
                     }
-                });
+                    var trackalbum = track.get("albumKey");
+                    if (trackalbum != curr_album) {
+                        console.log(trackalbum + " != " + curr_album);
+                        need_album_refresh = true;
+                    }
+                    keys.push(trackkey);
+                }
+                console.log("currently playing index " + i);
+                if(i > 0) {
+                    if (i > 1) {
+                        console.log("possible bug?");
+                        console.log(curr_song);
+                        console.log(R.player.playingTrack().get("key"));
+                        console.log("would have deleted " + keys.join(','));
+                        var debug_message = document.createElement('p');
+                        debug_message.innerHTML = 'Did not delete finished song due to possible bug.  Please manually delete played songs from your playlist on Rdio';
+                        debug_box.appendChild(debug_message);
+                        if (debug_box.children.length > 4)
+                            debug_box.removeChild(debug_box.children[0]);
+                        if (need_album_refresh) {
+                            self.populateAlbumsBox();
+                        }
+                        return;
+                    }
+                    R.request({
+                        method: 'removeFromPlaylist',
+                        content: {
+                            playlist: localStorage.album_radio_playlist,
+                            index: 0,
+                            count: keys.length,
+                            tracks: keys.join(',')
+                        },
+                        success: function (data) {
+                            console.log("yay, deleted songs");
+                            num_songs -= keys.length;
+                            clock.setValue(num_songs);
+
+
+                            /*if (num_songs <= 500) {
+                            add a new album
+                            } else*/ if (need_album_refresh) {
+                                self.populateAlbumsBox();
+                            } else {
+                                var album_box = document.getElementById('album_box');
+                                var progressbar = album_box.firstChild.getElementsByTagName('progress')[0];
+                                progressbar.value = progressbar.value + keys.length;
+                            }
+                        },
+                        error: function (response) {
+                            console.log("error: " + response.message);
+                        }
+                    });
+                } else {
+                    if (need_album_refresh) {
+                        self.populateAlbumsBox();
+                    }
+                }
             }
         },
 
