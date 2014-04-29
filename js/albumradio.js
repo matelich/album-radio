@@ -205,13 +205,16 @@
             
             var player_source_playlist = R.player.playingSource();
             var tracks = player_source_playlist.get("tracks");
+            clock.setValue(tracks.length);
             var key_counts = _.countBy(tracks.models, function (t) {
                 return t.get("albumKey");
             });
-            console.log(key_counts);
+            //console.log(key_counts);
             var just_keys = _.keys(key_counts);
             //console.log(just_keys);
 
+            //At this point, I don't think I can eliminate this request in favor of accessing something from player_source_playlist
+            //I probably should start caching some of it at some point, though
             R.request({
                 method: 'get',
                 content: {
