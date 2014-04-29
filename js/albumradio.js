@@ -176,9 +176,9 @@
                             clock.setValue(num_songs);
 
 
-                            if (num_songs <= 500) {
-                                self.a
-                            } else if (need_album_refresh) {
+                            /*if (num_songs <= 500) {
+                                
+                            } else*/ if (need_album_refresh) {
                                 self.populateAlbumsBox();
                             } else {
                                 var album_box = document.getElementById('album_box');
@@ -459,8 +459,7 @@
                             debug_box.appendChild(debug_message);
                             if (debug_box.children.length > 4)
                                 debug_box.removeChild(debug_box.children[0]);
-                            var num_songs = clock.getTime();
-                            num_songs += album_length;
+                            var num_songs = clock.getTime() + album_length;
                             clock.setValue(num_songs);
                         },
                         error: function (data) {
