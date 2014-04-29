@@ -125,7 +125,12 @@
                 var player_source_playlist = R.player.playingSource();
                 var tracks = player_source_playlist.get("tracks");
                 var curr_song = R.player.playingTrack().get("key");
-                var curr_album = R.player.playingTrack().get("albumKey");
+                var album_box = document.getElementById('album_box');
+                var current_album_element = album_box.getElementsByClassName('ar-big-album')[0];
+                var curr_album = null;
+                if (current_album_element) {
+                    curr_album = current_album_element.id;
+                }
                 var need_album_refresh = false;
                 var num_songs = tracks.length;
                 if (num_songs > clock.getTime()) {
@@ -269,6 +274,7 @@
                 console.log('Album is required for album widget');
                 _broken = true;
             }
+            _element.id = album.key;
 
             if (_broken) {
                 _element.innerHTML = ''
