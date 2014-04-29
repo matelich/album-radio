@@ -133,6 +133,7 @@ progress[value]::-webkit-progress-bar {
     background-repeat: no-repeat;
     width:36px;
     height:36px;
+    cursor: pointer;
 }
 
 /*tweak flipclock*/

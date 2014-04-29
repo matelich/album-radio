@@ -7,6 +7,7 @@
         Models: {},
         Views: {},
         currentView: null,
+        currentAlbum: null,
 
         // ----------
         init: function () {
@@ -175,9 +176,9 @@
                             clock.setValue(num_songs);
 
 
-                            /*if (num_songs <= 500) {
-                            add a new album
-                            } else*/ if (need_album_refresh) {
+                            if (num_songs <= 500) {
+                                self.a
+                            } else if (need_album_refresh) {
                                 self.populateAlbumsBox();
                             } else {
                                 var album_box = document.getElementById('album_box');
@@ -203,12 +204,7 @@
             var album_box = document.getElementById('album_box');
             album_box.innerHTML = '';
             
-            var player_source_playlist = R.player.playingSource();
-            var tracks = player_source_playlist.get("tracks");
-            clock.setValue(tracks.length);
-            var key_counts = _.countBy(tracks.models, function (t) {
-                return t.get("albumKey");
-            });
+            var key_counts = self.getPlaylistAlbums();
             //console.log(key_counts);
             var just_keys = _.keys(key_counts);
             //console.log(just_keys);
@@ -219,7 +215,7 @@
                 method: 'get',
                 content: {
                     keys: just_keys.join(','),
-                    extras: '-*,icon,name,artist,url,artistUrl,length,key,bigIcon'
+                    extras: '-*,icon,name,artist,url,artistUrl,length,key,bigIcon1200'
                 },
                 success: function (data) {
                     //console.log(data.result);
@@ -230,116 +226,24 @@
                         album_box.appendChild(widget);
                         if (first_album) {
                             var bg = document.querySelector('#bgImageContainer');
-                            bg.innerHTML = '<img class="sp-image" src="'+album.bigIcon+'" alt="large artwork" border="0"/>';
+                            bg.innerHTML = '<img class="sp-image" src="'+album.bigIcon1200+'" alt="large artwork" border="0"/>';
 
-                            /*
+                            
                             var starplus_button = document.createElement('div');
                             starplus_button.classList.add('starplusr');
-                            starplus_button.title = 'Star current song, follow artist, and add another album from this artist, if available';
-                            starplus_button.onclick = starPlus;
-                            image.node.appendChild(starplus_button);
-                            */
+                            starplus_button.title = 'Add current song to collection, follow artist, and add another album from this artist, if available';
+                            widget.appendChild(starplus_button);
+                            rdioUtils._bind(starplus_button, 'click', function (event) {
+                                rdioUtils._stopEvent(event);
+                                self.starPlus();
+                            });
+
 
                             first_album = false;
                         }
                     });
                 }
-            });
-        
-
-        /*
-                if (typeof snapshot === "undefined" || !snapshot) {
-                    var playlist = models.Playlist.fromURI(localStorage.album_radio_playlist);
-                    playlist.load('tracks', 'name').done(function (tracks) {
-                        var playlist_name = document.querySelector('#playlist_name');
-                        playlist_name.innerHTML = playlist.name;
-                        playlist.tracks.snapshot(0, 500).done(function (s) {
-                            s.loadAll('album').done(function (playlist_tracks) {
-                                populateAlbumsBox(playlist_tracks, 0);
-                            });
-                        });
-                    });
-                } else {
-                    if (index == 0) {
-                        album_box.innerHTML = '';
-                    }
-                    var throbber = Throbber.forElement(album_box);
-                    var albums_array = [];
-                    var trigger_promise = new models.Promise();
-                    var joined_promises = null;
-                    for (var i = 0; i < snapshot.length; i++) {
-                        var album = snapshot[i].album;
-                        if (albums_array.indexOf(album) == -1 && (index == 0 || album.uri != last_loaded_uri)) {
-                            albums_array.push(album);
-                            var load_promise = album.load('name', 'artists');
-                            if (joined_promises == null) {
-                                joined_promises = models.Promise.join(trigger_promise, load_promise);
-                            } else {
-                                joined_promises = models.Promise.join(joined_promises, load_promise);
-                            }
-                        }
-                    }
-                    trigger_promise.setDone();
-                    console.log("albums found: " + albums_array.length + ", index: " + index);
-                    if (joined_promises) {
-                        joined_promises.always(function () {
-                            var first_album = (index == 0);
-                            albums_array.forEach(function (album) {
-                                var album_title = album.name + ' by ';
-                                var first = true;
-                                album.artists.forEach(function (a) { if (!first) { album_title += ', '; } first = false; album_title += a.name; });
-                                if (first_album) {
-                                    first_album = false;
-                                    var image = Image.forAlbum(album, { width: 256, height: 256, title: album_title });
-        
-                                    var starplus_button = document.createElement('div');
-                                    starplus_button.classList.add('starplusr');
-                                    starplus_button.title = 'Star current song, follow artist, and add another album from this artist, if available';
-                                    starplus_button.onclick = starPlus;
-                                    image.node.appendChild(starplus_button);
-        
-                                    setBackgroundImage(album);
-                                } else {
-                                    var image = Image.forAlbum(album, { width: 64, height: 64, title: album_title });
-                                }
-                                var delete_button = document.createElement('div');
-                                delete_button.classList.add('deleter');
-                                delete_button.title = 'Delete This Album';
-                                delete_button.onclick = deleteAlbum;
-                                image.node.appendChild(delete_button);
-        
-                                album_box.appendChild(image.node);
-        
-                            });
-                            if (snapshot.length >= 500) {
-                                var playlist = models.Playlist.fromURI(localStorage.album_radio_playlist);
-                                playlist.load('tracks').done(function (tracks) {
-                                    playlist.tracks.snapshot(500 * (index + 1), 500).done(function (s) {
-                                        console.log(index + ' load extra songs: ' + s.length);
-                                        //var playlist_count = document.querySelector('#playlist_count');
-                                        localStorage.str_num_playlist_songs = s.length;
-                                        //playlist_count.innerHTML = s.length + ' tracks';
-                                        clock.setValue(s.length);
-                                        s.loadAll('album').done(function (playlist_tracks) {
-                                            populateAlbumsBox(playlist_tracks, index + 1, albums_array[albums_array.length - 1].uri);
-                                        });
-                                    });
-                                });
-                            } else if(index == 0) {
-                                // var playlist_count = document.querySelector('#playlist_count');
-                                clock.setValue(500 * index + snapshot.length);
-                                localStorage.str_num_playlist_songs = (500 * index + snapshot.length);
-                                // playlist_count.innerHTML = localStorage.str_num_playlist_songs + ' tracks';
-                            }
-        
-                            throbber.hide();
-                        });
-                    }
-                    else {
-                        throbber.hide();
-                    }
-                }
-        */
+            });      
         },
 
         albumWidget: function (album, num_left, first) {
@@ -487,58 +391,102 @@
             });
         },
 
-        getPlaylistAlbums: function (callback, snapshot, index, albums_array, last_loaded_uri) {
-    /*
-            if (typeof snapshot === "undefined" || !snapshot) {
-                var playlist = models.Playlist.fromURI(localStorage.album_radio_playlist);
-                playlist.load('tracks').done(function (tracks) {
-                    playlist.tracks.snapshot(0, 500).done(function (s) {
-                        s.loadAll('album').done(function (playlist_tracks) {
-                            var foo = [];
-                            getPlaylistAlbums(callback, playlist_tracks, 0, foo);
-                        });
-                    });
-                });
+        getPlaylistAlbums: function () {
+            var player_source_playlist = R.player.playingSource();
+            var tracks = player_source_playlist.get("tracks");
+            clock.setValue(tracks.length);
+            var key_counts = _.countBy(tracks.models, function (t) {
+                return t.get("albumKey");
+            });
+            return key_counts;
+        },
+
+        addRandomArtistAlbum: function(artists, call_count) {
+            if (typeof call_count === "undefined" || !call_count) {
+                call_count = 1;
             } else {
-                var trigger_promise = new models.Promise();
-                var joined_promises = null;
-                console.log("snapshot length: " + snapshot.length);
-                for (var i = 0; i < snapshot.length; i++) {
-                    var album = snapshot[i].album;
-                    if (albums_array.indexOf(album) == -1 && (index == 0 || album.uri != last_loaded_uri)) {
-                        albums_array.push(album);
-                        var load_promise = album.load('name', 'artists');
-                        if (joined_promises == null) {
-                            joined_promises = models.Promise.join(trigger_promise, load_promise);
-                        } else {
-                            joined_promises = models.Promise.join(joined_promises, load_promise);
-                        }
-                    }
-                }
-                trigger_promise.setDone();
-                console.log("albums found: " + albums_array.length);
-                if (joined_promises) {
-                    joined_promises.always(function () {
-                        if (snapshot.length >= 500) {
-                            var playlist = models.Playlist.fromURI(localStorage.album_radio_playlist);
-                            playlist.load('tracks').done(function (tracks) {
-                                playlist.tracks.snapshot(500 * (index + 1), 500).done(function (s) {
-                                    console.log('load extra songs: ' + s.length);
-                                    s.loadAll('album').done(function (playlist_tracks) {
-                                        getPlaylistAlbums(callback, playlist_tracks, index + 1, albums_array, albums_array[albums_array.length - 1].uri);
-                                    });
-                                });
-                            });
-                        } else {
-                            callback(albums_array);
-                        }
-                    });
-                }
-                else {
-                    callback(albums_array);
+                if (call_count > 5) {
+                    console.log("giving up on adding album, too many dups");
+                    return;
                 }
             }
-    */
+
+            var self = this;
+            var playlist_albums = _.keys(self.getPlaylistAlbums());
+
+            console.log(playlist_albums.length + " albums already in playlist. Picking from this many artists: " + artists.length);
+            //pick a random artist from the list
+            var found_one = false;
+            var rand = artists[Math.floor(Math.random() * artists.length)];
+            R.request({
+                method: 'getAlbumsForArtist',
+                content: {
+                    artist: rand,
+                    extras: '-*,icon,name,artist,url,artistUrl,length,key,bigIcon1200,canStream,trackKeys'
+                },
+                success: function (data) {
+                    //console.log(data.result);
+
+                    function isPlayable(album) { return album.canStream == true; }
+                    var albums = data.result.filter(isPlayable);
+                    var selected_album = albums[Math.floor(Math.random() * albums.length)];
+                    if (playlist_albums.indexOf(selected_album.key) != -1) {
+                        console.log("skipping album because it's already present");
+                        self.addRandomArtistAlbum(artists, call_count + 1);
+                        return;
+                    }
+                    var album_length = selected_album.trackKeys.length;
+                    if(album_length < 3) {
+                        console.log("skipping album because it's too short");
+                        self.addRandomArtistAlbum(artists, call_count + 1);
+                        return;
+                    }
+
+                    R.request({
+                        method: 'addToPlaylist',
+                        content: {
+                            playlist: localStorage.album_radio_playlist,
+                            tracks: selected_album.trackKeys.join(',')
+                        },
+                        success: function (data) {
+                            console.log("yay, added " + album_length + " songs for album " + selected_album.key);
+                            //self.populateAlbumsBox();
+                            var widget = self.albumWidget(selected_album, album_length, false);
+                            album_box.appendChild(widget);
+                            var debug_message = document.createElement('p');
+                            debug_message.innerHTML = 'Added ' + album_length + ' songs to playlist from ' + selected_album.artist + '\'s album ' + selected_album.name;
+                            var debug_box = document.querySelector('#debugging');
+                            debug_box.appendChild(debug_message);
+                            if (debug_box.children.length > 4)
+                                debug_box.removeChild(debug_box.children[0]);
+                            var num_songs = clock.getTime();
+                            num_songs += album_length;
+                            clock.setValue(num_songs);
+                        },
+                        error: function (data) {
+                            console.log("boo - " + data);
+                        }
+                    });
+                }
+            });
+        },
+
+        starPlus: function() {
+            R.request({
+                method: 'addToCollection',
+                content: {
+                    keys: R.player.playingTrack().get("key")
+                },
+                success: function (data) {
+                    console.log("added current track to collection");
+                },
+                error: function (response) {
+                    console.log("error: " + response.message);
+                }
+            });
+            var artists = [];
+            artists.push(R.player.playingTrack().get("artistKey"));
+            this.addRandomArtistAlbum(artists);
         },
 
         // ----------
@@ -701,183 +649,8 @@
 
     //ENDREGION drag/drop
 
-    //REGION utility funcs
-    function starPlus(e) {
-/*
-        var library = Library.forCurrentUser();
-        library.star(models.player.track).done(function () { console.log("Added current song to Starred"); });
-        var artists = [];
-        models.player.track.artists.forEach(function (a) { artists.push(a); });
-        addRandomArtistAlbum(artists);
-        var rels = Relations.forCurrentUser();
-        rels.subscribe(artists[0]);
-*/
-    }
-
-    function deleteAlbum(e) {
-/*
-        var playlist = models.Playlist.fromURI(localStorage.album_radio_playlist);
-        models.player.track.load('album').done(function () {
-            var album_uri = e.target.parentNode.getAttribute('data-uri');
-            var next_track = (album_uri == models.player.track.album.uri);
-
-            playlist.load('tracks').done(function (tracks) {
-                playlist.tracks.snapshot(0, 20).done(function (s) {
-                    s.loadAll('album').done(function (sn) { deleteAlbumTracks(playlist, album_uri, next_track, s, sn, 0); });
-                });
-            });
-        });
-*/
-    }
-
-    function deleteAlbumTracks(playlist, album_uri, next_track, snappy, snap_tracks, start_index) {
-/*
-        if (snap_tracks.length == 0) { return; }
-
-        for (var i = 0; i < snap_tracks.length; i++) {
-            if (snap_tracks[i].album.uri.substr(-22) == album_uri.substr(-22)) //substr because this check was failing, and substr forces a string format(?)
-            {
-                if (i == snap_tracks.length - 1 && snap_tracks.length != 1) { //we need to have the song after the one we're deleting, so just get the next snap with this one included
-                    playlist.tracks.snapshot(start_index + i, 20).done(function (s) {
-                        s.loadAll('album').done(function (sn) { deleteAlbumTracks(playlist, album_uri, next_track, s, sn, start_index + i); });
-                    });
-                } else {
-                    var done_with_album = (snap_tracks.length == 1 || (snap_tracks[i].album != snap_tracks[i + 1].album));
-                    var index_to_delete = i;
-                    if (snap_tracks.length != snappy.length) {
-                        index_to_delete = start_index + i; //yes, this is scary.  I don't like it one little bit.  But it seems to work
-                    }
-                    playlist.tracks.remove(snappy.ref(index_to_delete)).done(function () {
-                        console.log('deleted a song from album');
-                        if (done_with_album) {
-                            populateAlbumsBox();
-                            if (next_track) {
-                                models.player.skipToNextTrack();
-                            }
-                            return;
-                        }
-                        playlist.tracks.snapshot(start_index + i, 20).done(function (s) {
-                            s.loadAll('album').done(function (sn) { deleteAlbumTracks(playlist, album_uri, next_track, s, sn, start_index + i); });
-                        });
-                    }).fail(function (blah, err) { console.log("failed to delete song " + err.message); });
-                }
-                return; //the for loop continues in the recursion
-            }
-        }
-        playlist.tracks.snapshot(start_index + snap_tracks.length, 20).done(function (s) {
-            s.loadAll('album').done(function (sn) { deleteAlbumTracks(playlist, album_uri, next_track, s, sn, start_index + i); });
-        });
-*/
-    }
-
     //only pass callback to this
 
-    function setBackgroundImage(album)
-    {
-/*
-        var image = Image.forAlbum(album, { width: 800, height: 800 });
-        var bg = document.querySelector('#bgImageContainer');
-        bg.innerHTML = '';
-        image.node.removeAttribute('style');
-        bg.appendChild(image.node);
-*/
-    }
-
-    //don't pass stuff in to this, let it handle the params itself
-
-    function deletePlayed(playlist, snapshot) {
-/*
-        if (snapshot.toArray()[0] != models.player.track) {
-            var reload = (snapshot.toArray()[0].album != models.player.track.album);
-            playlist.tracks.remove(snapshot.ref(0)).done(function () {
-                console.log('deleted a song');
-                if (reload) { populateAlbumsBox(); }
-                else {
-                    // var playlist_count = document.querySelector('#playlist_count');
-                    var num_songs = parseInt(localStorage.str_num_playlist_songs) - 1;
-                    clock.setValue(num_songs);
-                    localStorage.str_num_playlist_songs = num_songs;
-                    // playlist_count.innerHTML = localStorage.str_num_playlist_songs + ' tracks';
-                }
-                playlist.tracks.snapshot(0, 1).done(function (sn) { deletePlayed(playlist, sn); });
-            });
-        }
-*/
-    }
-
-    function addRandomArtistAlbum(artists, playlist, playlist_albums, call_count) {
-/*
-        if (typeof playlist === "undefined" || !playlist) {
-            playlist = models.Playlist.fromURI(localStorage.album_radio_playlist);
-        }
-        if (typeof playlist_albums === "undefined" || !playlist_albums) {
-            getPlaylistAlbums(function (albums) { addRandomArtistAlbum(artists, playlist, albums); });
-            return;
-        }
-        if (typeof call_count === "undefined" || !call_count) {
-            call_count = 1;
-        } else {
-            if (call_count > 5) {
-                console.log("giving up on adding album, too many dups");
-                return;
-            }
-        }
-        console.log(playlist_albums.length + " albums already in playlist. Picking from this many artists: " + artists.length);
-        //pick a random artist from the list
-        var found_one = false;
-        //while(!found_one)
-        {
-            var rand = artists[Math.floor(Math.random() * artists.length)];
-            rand.load('albums', 'name').done(function (albums) {
-                rand.albums.snapshot().done(function (s) {
-                    s.loadAll().done(function (albums_snapshot) {
-                        function isPlayable(album) { return album.playable = true; }
-                        var albums = albums_snapshot.filter(isPlayable);
-                        var selected_album = albums[Math.floor(Math.random() * albums.length)].albums[0];
-                        if (playlist_albums.indexOf(selected_album) != -1) {
-                            console.log("skipping album because it's already present");
-                            addRandomArtistAlbum(artists, playlist, playlist_albums, call_count + 1);
-                            return;
-                        }
-                        selected_album.load('name', 'tracks').done(function () {
-                            //refresh the tracks
-                            //playlist.tracks.snapshot(0, 500).done(function (playlist_tracks) {
-                            //  console.log('snapshot reloaded');
-
-                            //});
-                            selected_album.tracks.filter('==', 'playable', 'true').snapshot().done(function (s) {
-                                s.loadAll().done(function (tracks_to_append) {
-                                    if (tracks_to_append.length < 3) {
-                                        console.log("skipping album because it's too short");
-                                        addRandomArtistAlbum(artists, playlist, playlist_albums, call_count + 1);
-                                        return;
-                                    }
-                                    playlist.tracks.add(tracks_to_append)
-                                        .done(function () {
-                                            console.log("appended songs");
-                                            var debug_message = document.createElement('p');
-                                            debug_message.innerHTML = 'Added ' + tracks_to_append.length + ' songs to playlist from ' + rand.name + '\'s album ' + selected_album.name;
-                                            debug_box.appendChild(debug_message);
-                                            if (debug_box.children.length > 4)
-                                                debug_box.removeChild(debug_box.children[0]);
-                                            // var playlist_count = document.querySelector('#playlist_count');
-                                            var num_songs = parseInt(localStorage.str_num_playlist_songs) + tracks_to_append.length;
-                                            clock.setValue(num_songs);
-                                            localStorage.str_num_playlist_songs = num_songs;
-                                            // playlist_count.innerHTML = num_songs + ' tracks';
-                                            populateAlbumsBox();
-                                        })
-                                        .fail(function (blah, err) { console.log("failed to append " + err.message); });
-                                });
-                            });
-                        }).fail(function (blah, err) { console.log(err.message); });
-                        found_one = true;
-                    });
-                });
-            });
-        }
-*/
-    }
 
     //ENDREGION
 
