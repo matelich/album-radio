@@ -139,14 +139,13 @@
                 var keys = [];
                 for (var i = 0, l = tracks.length; i < l; i++) {
                     var track = tracks.at(i);
+                    var trackalbum = track.get("albumKey");
+                    if (trackalbum != curr_album) {
+                        need_album_refresh = true;
+                    }
                     var trackkey = track.get("key");
                     if (trackkey === curr_song) {
                         break;
-                    }
-                    var trackalbum = track.get("albumKey");
-                    if (trackalbum != curr_album) {
-                        console.log(trackalbum + " != " + curr_album);
-                        need_album_refresh = true;
                     }
                     keys.push(trackkey);
                 }
