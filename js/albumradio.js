@@ -7,7 +7,7 @@
         Models: {},
         Views: {},
         currentView: null,
-        currentAlbum: null,
+        streamRegion: 'US',
 
         // ----------
         init: function () {
@@ -37,6 +37,19 @@
             var self = this;
             var url = R.currentUser.get('url');
             console.log(url);
+
+            R.request({
+                method: 'currentUser',
+                content: {
+                    extras: '-*,streamRegion'
+                },
+                success: function (data) {
+                    self.streamRegion = data.result.streamRegion;
+                },
+                error: function (response) {
+                    console.log(response);
+                }
+            });
 /*
             R.request({
                 method: 'getObjectFromUrl',
@@ -114,7 +127,20 @@
                 allowed_message.remove();
             }, 5000);
             R.player.on('change:playingTrack', self.trackChanged, self);
+/*
+            R.player.on('change:playingSource', function (foo, bar) {
+                console.log("something changed w/ source " + bar);
+            });
+*/
             self.trackChanged();
+/*
+            var tracks = R.player.playingSource().get("tracks");
+            tracks.on('add', function (model, collection, info) { console.log("add event"); });
+            tracks.on('remove', function (model, collection, info) { console.log("remove event"); });
+            tracks.on('reset', function (model, collection, info) { console.log("reset event"); });
+            tracks.on("all", function (model, collection, info) { console.log("all event"); });
+            R.player.playingSource().on("all", function (eventname) { console.log("source event " + eventname); });
+*/
         },
 
         trackChanged: function() {
@@ -137,11 +163,15 @@
                     need_album_refresh = true;
                 }
                 var keys = [];
+                var finished_artist = null;
                 for (var i = 0, l = tracks.length; i < l; i++) {
                     var track = tracks.at(i);
                     var trackalbum = track.get("albumKey");
                     if (trackalbum != curr_album) {
                         need_album_refresh = true;
+                    }
+                    if (i == 0) {
+                        finished_artist = track.get("artistKey");
                     }
                     var trackkey = track.get("key");
                     if (trackkey === curr_song) {
@@ -180,9 +210,9 @@
                             clock.setValue(num_songs);
 
 
-                            /*if (num_songs <= 500) {
-                                
-                            } else*/ if (need_album_refresh) {
+                            if (num_songs <= 500) {
+                                self.addRelatedArtist(finished_artist);
+                            } else if (need_album_refresh) {
                                 self.populateAlbumsBox();
                             } else {
                                 var album_box = document.getElementById('album_box');
@@ -219,7 +249,7 @@
                 method: 'get',
                 content: {
                     keys: just_keys.join(','),
-                    extras: '-*,icon,name,artist,url,artistUrl,length,key,bigIcon1200'
+                    extras: '-*,icon,name,artist,url,artistUrl,length,key,bigIcon1200' //,artistKey'
                 },
                 success: function (data) {
                     //console.log(data.result);
@@ -229,10 +259,12 @@
                         var widget = self.albumWidget(album, v, first_album);
                         album_box.appendChild(widget);
                         if (first_album) {
+                            //test only
+                            //self.addRelatedArtist(album.artistKey);
+
                             var bg = document.querySelector('#bgImageContainer');
                             bg.innerHTML = '<img class="sp-image" src="'+album.bigIcon1200+'" alt="large artwork" border="0"/>';
-
-                            
+                                                        
                             var starplus_button = document.createElement('div');
                             starplus_button.classList.add('starplusr');
                             starplus_button.title = 'Add current song to collection, follow artist, and add another album from this artist, if available';
@@ -406,6 +438,23 @@
             return key_counts;
         },
 
+        addRelatedArtist: function(artist) {
+            var self = this;
+            var url = 'http://developer.echonest.com/api/v4/artist/similar';
+            url += '?api_key=MJPHN8QH05LGIAYID';
+            url += '&name=rdio-' + self.streamRegion + ':artist:' + artist;
+            url += '&bucket=id:rdio-' + self.streamRegion;
+            url += '&format=jsonp&callback=?';
+            $.getJSON(url,function(data) {
+                var artists = [];
+                artists.push(artist);
+                _.each(data.response.artists, function (a) {
+                    artists.push(a.foreign_ids[0].foreign_id.substr(15))
+                });
+                self.addRandomArtistAlbum(artists);
+            });
+        },
+
         addRandomArtistAlbum: function(artists, call_count) {
             if (typeof call_count === "undefined" || !call_count) {
                 call_count = 1;
@@ -464,7 +513,7 @@
                             debug_box.appendChild(debug_message);
                             if (debug_box.children.length > 4)
                                 debug_box.removeChild(debug_box.children[0]);
-                            var num_songs = clock.getTime() + album_length;
+                            var num_songs = Number(clock.getTime()) + album_length;
                             clock.setValue(num_songs);
                         },
                         error: function (data) {
@@ -475,7 +524,9 @@
             });
         },
 
-        starPlus: function() {
+        starPlus: function () {
+            //Three things for starplus
+            //1) add song to collection
             R.request({
                 method: 'addToCollection',
                 content: {
@@ -488,9 +539,25 @@
                     console.log("error: " + response.message);
                 }
             });
+            //2) add another album from the artist
             var artists = [];
-            artists.push(R.player.playingTrack().get("artistKey"));
+            var artistkey = R.player.playingTrack().get("artistKey");
+            artists.push(artistkey);
             this.addRandomArtistAlbum(artists);
+            //3) Follow artist
+            R.request({
+                method: 'get',
+                content: {
+                    keys: artistkey,
+                    extras: '-*,bandMembers'
+                },
+                success: function (data) {
+                    console.log("bandmembers: " + data.result);
+                },
+                error: function (message) {
+                    console.log("error: " + response.message);
+                }
+            });
         },
 
         // ----------
