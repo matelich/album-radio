@@ -136,6 +136,13 @@ progress[value]::-webkit-progress-bar {
     cursor: pointer;
 }
 
+.buttondiv {
+    display: inline-block;
+    height:36px;
+    background-color: rgba(255, 100, 67, .3);
+    cursor: pointer;
+}
+
 /*tweak flipclock*/
 .clock {
     position: relative !important;

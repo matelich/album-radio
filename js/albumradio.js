@@ -8,6 +8,7 @@
         Views: {},
         currentView: null,
         streamRegion: 'US',
+        skippy: false,
 
         // ----------
         init: function () {
@@ -31,6 +32,17 @@
             });
 
             //self.spin(true);
+            var play_button = document.getElementById('play_toggle');
+            rdioUtils._bind(play_button, 'click', function (event) {
+                rdioUtils._stopEvent(event);
+                R.player.togglePause();
+            });
+            var skip_button = document.getElementById('skip_button');
+            rdioUtils._bind(skip_button, 'click', function (event) {
+                rdioUtils._stopEvent(event);
+                self.skippy = true;
+                R.player.next();
+            });
         },
 
         beenAuthenticated: function() {
@@ -145,6 +157,8 @@
 
         trackChanged: function() {
             var self = this;
+            var was_skippy = self.skippy;
+            self.skippy = false;
             var debug_box = document.querySelector('#debugging');
             if (localStorage.album_radio_playlist == R.player.playingSource().get("key")) {
                 console.log('Played a song from your playlist - trimming start of playlist');
@@ -211,8 +225,11 @@
 
 
                             if (num_songs <= 500) {
+                                if (self.skippy)
+                                    finished_artist = null;
                                 self.addRelatedArtist(finished_artist);
-                            } else if (need_album_refresh) {
+                            }
+                            if (need_album_refresh) {
                                 self.populateAlbumsBox();
                             } else {
                                 var album_box = document.getElementById('album_box');
@@ -440,19 +457,39 @@
 
         addRelatedArtist: function(artist) {
             var self = this;
-            var url = 'http://developer.echonest.com/api/v4/artist/similar';
-            url += '?api_key=MJPHN8QH05LGIAYID';
-            url += '&name=rdio-' + self.streamRegion + ':artist:' + artist;
-            url += '&bucket=id:rdio-' + self.streamRegion;
-            url += '&format=jsonp&callback=?';
-            $.getJSON(url,function(data) {
-                var artists = [];
-                artists.push(artist);
-                _.each(data.response.artists, function (a) {
-                    artists.push(a.foreign_ids[0].foreign_id.substr(15))
+            if (artist != null) {
+                var url = 'http://developer.echonest.com/api/v4/artist/similar';
+                url += '?api_key=MJPHN8QH05LGIAYID';
+                url += '&name=rdio-' + self.streamRegion + ':artist:' + artist;
+                url += '&bucket=id:rdio-' + self.streamRegion;
+                url += '&format=jsonp&callback=?';
+                $.getJSON(url, function (data) {
+                    var artists = [];
+                    artists.push(artist);
+                    _.each(data.response.artists, function (a) {
+                        if (a.foreign_ids.length > 0) {
+                            artists.push(a.foreign_ids[0].foreign_id.substr(15))
+                        } else {
+                            console.log("artist " + a.name + " didn't have a rdio id. Similar to " + artist);
+                        }
+                    });
+                    self.addRandomArtistAlbum(artists);
                 });
-                self.addRandomArtistAlbum(artists);
-            });
+            } else {
+                R.request({
+                    method: 'getArtistsInCollection',
+                    content: {
+                        extras: '-*,artistKey'
+                    },
+                    success: function (data) {
+                        var artists = [];
+                        _.each(data.result, function (a) {
+                            artists.push(a.artistKey);
+                        });
+                    },
+                    error: function (response) { console.log("response"); }
+                });
+            }
         },
 
         addRandomArtistAlbum: function(artists, call_count) {
@@ -483,6 +520,11 @@
 
                     function isPlayable(album) { return album.canStream == true; }
                     var albums = data.result.filter(isPlayable);
+                    if (albums.length < 1) {
+                        console.log("skipping artist because he has no playable albums - " + rand);
+                        self.addRandomArtistAlbum(artists, call_count + 1);
+                        return;
+                    }
                     var selected_album = albums[Math.floor(Math.random() * albums.length)];
                     if (playlist_albums.indexOf(selected_album.key) != -1) {
                         console.log("skipping album because it's already present");
