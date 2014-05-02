@@ -433,7 +433,7 @@
                                 console.log("yay, deleted "+keys.length+" songs for album " + albumkey);
                                 self.populateAlbumsBox();
                                 if (start_index == 0) {
-                                    //looks like the player auto-skips when the song is deleted R.player.next();
+                                    self.skippy = true;
                                 }
                             },
                             error: function (data) {
