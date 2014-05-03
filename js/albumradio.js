@@ -32,12 +32,17 @@
             });
 
             //self.spin(true);
-            var play_button = document.getElementById('play_toggle');
+            var play_button = document.getElementById('play');
             rdioUtils._bind(play_button, 'click', function (event) {
                 rdioUtils._stopEvent(event);
-                R.player.togglePause();
+                R.player.play();
             });
-            var skip_button = document.getElementById('skip_button');
+            var pause_button = document.getElementById('pause');
+            rdioUtils._bind(pause_button, 'click', function (event) {
+                rdioUtils._stopEvent(event);
+                R.player.pause();
+            });
+            var skip_button = document.getElementById('fwd');
             rdioUtils._bind(skip_button, 'click', function (event) {
                 rdioUtils._stopEvent(event);
                 self.skippy = true;
