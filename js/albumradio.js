@@ -486,6 +486,8 @@
                         _.each(data.result, function (a) {
                             artists.push(a.artistKey);
                         });
+                        console.log("picking from your " + artists.length + " artists for an album, since you skipped");
+                        self.addRandomArtistAlbum(artists);
                     },
                     error: function (response) { console.log("response"); }
                 });
