@@ -225,7 +225,7 @@
 
 
                             if (num_songs <= 500) {
-                                if (self.skippy)
+                                if (was_skippy)
                                     finished_artist = null;
                                 self.addRelatedArtist(finished_artist);
                             }
@@ -457,6 +457,7 @@
 
         addRelatedArtist: function(artist) {
             var self = this;
+            console.log(artist);
             if (artist != null) {
                 var url = 'http://developer.echonest.com/api/v4/artist/similar';
                 url += '?api_key=MJPHN8QH05LGIAYID';
@@ -467,10 +468,10 @@
                     var artists = [];
                     artists.push(artist);
                     _.each(data.response.artists, function (a) {
-                        if (a.foreign_ids.length > 0) {
-                            artists.push(a.foreign_ids[0].foreign_id.substr(15))
-                        } else {
+                        if (typeof a.foreign_ids === "undefined" || a.foreign_ids.length < 1) {
                             console.log("artist " + a.name + " didn't have a rdio id. Similar to " + artist);
+                        } else {
+                            artists.push(a.foreign_ids[0].foreign_id.substr(15))
                         }
                     });
                     self.addRandomArtistAlbum(artists);
