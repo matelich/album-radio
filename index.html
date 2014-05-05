@@ -56,13 +56,14 @@
     <div class="section">
         <a href="top"></a>
         <h1>Album Radio</h1>
-        <p class="description">Hey there, this is the number one <a href="http://github.com/matelich/album-radio">open source</a> Rdio website for album radio!</p>
+        <p class="description">Hey there, welcome to the number one <a href="http://github.com/matelich/album-radio">open source</a> Rdio website for all album radios!</p>
         <div>
             <div>A few things you should know before you get started - <a class="readmore" href="#">Show</a></div>
             <ol class="hide">
-                <li>You can only operate the radio on your own playlists, and you need to create one for me yourself along with one or more songs.
+                <li>You can only operate the radio on your own playlists, which you need to create on Rdio.
                 <ul>
-                    <li>It's recommended to take a few songs from favorite artists to initially populate the playlist</li>
+                    <li>The playlist must have one or more songs.</li>
+                    <li>It's recommended to take a few songs from your favorite artists to initially fill up the playlist</li>
                     <li>You can switch between multiple playlists, just drag them to the playlist box below</li>
                 </ul>
                 </li>
@@ -78,9 +79,9 @@
             <div id="unauthorized"><p>To get started, you'll have to <button id="authenticate">authorize</button>.</p></div>
             <div id="playlist_selection">Choose the Playlist you want Album Radio to work with: <select name="combo" id="playlist_selector"></select></div>
             <h3 id="noplaylistmsg"><!--Drag and Drop a playlist you want Album Radio to manage--></h3>
-            <div id="playlist_info" class="killscroll">
-                <h2 id="playlist_name"></h2>
-                <div class="clock" id="playlist_count"></div>
+            <div id="playlist_info" class="wrappy">
+                <h2 id="playlist_name" class="wrappy"></h2>
+                <div class="clock" id="playlist_count" class="wrappy"></div>
             </div>
 <!--             <div class="buttondiv" id="play_toggle">Play Toggle</div>
             <div class="buttondiv" id="skip_button">Skip This Track</div>
