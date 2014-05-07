@@ -10,6 +10,8 @@ primary functions, adding whole albums to the end of a playlist and deleting pla
 
 Feature queue is at https://trello.com/b/kiIbEIy5/album-radio
 
+The site is live at http://matelich.github.io/album-radio
+
 Other notes
 -----------
 
