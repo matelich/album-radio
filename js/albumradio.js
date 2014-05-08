@@ -168,6 +168,7 @@
             if (localStorage.album_radio_playlist == R.player.playingSource().get("key")) {
                 console.log('Played a song from your playlist - trimming start of playlist');
                 var player_source_playlist = R.player.playingSource();
+                document.getElementById('playlist_name').innerHTML = player_source_playlist.get("name");
                 var tracks = player_source_playlist.get("tracks");
                 var curr_song = R.player.playingTrack().get("key");
                 var album_box = document.getElementById('album_box');
