@@ -64,7 +64,7 @@
                     self.streamRegion = data.result.streamRegion;
                 },
                 error: function (response) {
-                    console.log(response);
+                    console.log(response.message);
                 }
             });
 /*
@@ -442,8 +442,8 @@
                                     self.skippy = true;
                                 }
                             },
-                            error: function (data) {
-                                console.log("boo - " + data);
+                            error: function (response) {
+                                console.log("error: " + response.message);
                             }
                         });
                     }
@@ -496,7 +496,9 @@
                         console.log("picking from your " + artists.length + " artists for an album, since you skipped");
                         self.addRandomArtistAlbum(artists);
                     },
-                    error: function (response) { console.log("response"); }
+                    error: function (response) {
+                        console.log("error: " + response.message);
+                    }
                 });
             }
         },
@@ -567,8 +569,8 @@
                             var num_songs = Number(clock.getTime()) + album_length;
                             clock.setValue(num_songs);
                         },
-                        error: function (data) {
-                            console.log("boo - " + data);
+                        error: function (response) {
+                            console.log("error: " + response.message);
                         }
                     });
                 }
@@ -603,9 +605,21 @@
                     extras: '-*,bandMembers'
                 },
                 success: function (data) {
-                    console.log("bandmembers: " + data.result);
+                    _.each(data.result[artistkey].bandMembers, function(bm) {
+                        console.log("bandmember: " + bm.firstName + " " + bm.lastName + " - " + bm.key);
+                        R.request({
+                            method: 'addFriend',
+                            content: { user: bm.key },
+                            success: function (data) {
+                                console.log("followed " + bm.firstName);
+                            },
+                            error: function (response) {
+                                console.log("error: " + response.message);
+                            }
+                        });
+                    });
                 },
-                error: function (message) {
+                error: function (response) {
                     console.log("error: " + response.message);
                 }
             });
