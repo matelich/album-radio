@@ -149,7 +149,9 @@ progress[value]::-webkit-progress-bar {
     -moz-transform: scale(.54); /* Firefox */
     margin-left: -50px;
     margin-top: -20px;
+    margin-bottom: -20px;
     width: 250px;
+    display: inline-block
 }
 
 #blankarea {
@@ -257,4 +259,25 @@ progress[value]::-webkit-progress-bar {
 .album-author a:active,
 .album-size a:active {
   color: #89949B;
+}
+
+.button {
+  width: 48px;
+  height: 48px;
+  cursor: pointer;
+  &:hover {
+    fill: white; 
+  }
+}
+
+.defs {
+  position: absolute;
+  top: -9999px;
+  left: -9999px;
+}
+
+.buttons {
+  padding: 12px;
+  background: rgba(255, 133, 15, 0.16);
+  display: inline-block;
 }

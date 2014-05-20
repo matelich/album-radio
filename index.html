@@ -14,7 +14,6 @@
     <link rel="stylesheet" href="css/flipclock.css">
     <link rel="stylesheet" href="css/rdio-utils.css">
     <link rel="stylesheet" href="css/main.css">
-    <link rel="stylesheet" href="css/dabblet.css">
 
     <script src="https://www.rdio.com/api/api.js?client_id=3MD7hLFv5h9A7L2s0jmDQg"></script>
 
@@ -40,6 +39,21 @@
             $()
         }
     </script>
+
+    <!-- SVG ==
+        Play and Pause by aguycalledgary from The Noun Project
+            http://thenounproject.com/term/play/23255/ 
+            http://thenounproject.com/term/pause/23254/ 
+        fwd button made by editing Play button
+        -->
+    <svg class="defs">
+        <defs>
+            <path id="pause-button-shape" d="m24,0c-13.255,0 -24,10.745 -24,24s10.745,24 24,24s24,-10.745 24,-24s-10.745,-24 -24,-24zm-3,33.064c0,2.201 -1.688,4 -3.75,4s-3.75,-1.799 -3.75,-4l0,-18.13c0,-2.199 1.688,-4 3.75,-4s3.75,1.801 3.75,4l0,18.13zm13.5,0c0,2.201 -1.688,4 -3.75,4s-3.75,-1.799 -3.75,-4l0,-18.13c0,-2.199 1.688,-4 3.75,-4s3.75,1.801 3.75,4l0,18.13z"/>
+            <path id="play-button-shape" d="m24,0c-13.255,0 -24,10.745 -24,24s10.745,24 24,24s24,-10.745 24,-24s-10.745,-24 -24,-24zm7.672,26.828l-9.344,9.344c-1.557,1.557 -2.828,1.028 -2.828,-1.172l0,-22c0,-2.2 1.271,-2.729 2.828,-1.172l9.344,9.344c1.557,1.557 1.557,4.099 0,5.656z"/>
+            <path id="fwd-button-shape" d="m24,0c-13.255,0 -24,10.745 -24,24s10.745,24 24,24s24,-10.745 24,-24s-10.745,-24 -24,-24zm17.672,26.828l-9.34399,9.344c-1.55701,1.557 -2.82799,1.028 -2.82799,-1.172l0,-22c0,-2.2 1.27101,-2.729 2.82799,-1.172l9.34399,9.344c1.55701,1.557 1.55701,4.099 0,5.656zm-20,0l-9.34399,9.344c-1.55701,1.557 -2.82799,1.028 -2.82799,-1.172l0,-22c0,-2.2 1.27101,-2.729 2.82799,-1.172l9.34399,9.344c1.55701,1.557 1.55701,4.099 0,5.656z"/>
+        </defs>
+    </svg>
+
     <title>Album Radio</title>
 </head>
 <body>
@@ -55,7 +69,7 @@
     </div>
     <div class="section">
         <h1>Album Radio</h1>
-        <p class="description">Hey there, welcome to the number one <a href="http://github.com/matelich/album-radio">open source</a> Rdio website for full album radio!</p>
+        <p class="description">Hey there, welcome to the number one <a href="http://github.com/matelich/album-radio" target='_blank'>open source</a> Rdio website for full album radio!</p>
         <div>
             <div>A few things you should know before you get started - <a class="readmore" href="#">Show</a></div>
             <ol class="hide">
@@ -80,20 +94,30 @@
             <h3 id="noplaylistmsg"><!--Drag and Drop a playlist you want Album Radio to manage--></h3>
             <div id="playlist_info" class="wrappy">
                 <h2 id="playlist_name" class="wrappy"></h2>
-                <div class="clock" id="playlist_count" class="wrappy"></div>
+                <h3 id="current_track" class="wrappy"></h3>
             </div>
-<!--             <div class="buttondiv" id="play_toggle">Play Toggle</div>
-            <div class="buttondiv" id="skip_button">Skip This Track</div>
- -->
-            <div id="play"></div>
-            <div id="pause"></div>
-            <div id="fwd"></div>
+            <div>
+                <div class="clock" id="playlist_count" class="wrappy"></div>
+
+            <div class="buttons wrappy">
+                <svg class="button" id="play">
+                    <use xlink:href="#play-button-shape">
+                </svg>
+                <svg class="button" id="pause">
+                    <use xlink:href="#pause-button-shape">
+                </svg>
+                <svg class="button" id="fwd">
+                    <use xlink:href="#fwd-button-shape">
+                </svg>
+            </div>
+                </div>
         </div>
 
         <div id="album_box" class="dashbox"></div>
 
         <h3>Activity Log</h3>
         <div id="debugging" class="dashbox">
+            <p>Album Radio currently only works properly if you're playing music on the <a href="http://www.rdio.com" target="rdio">rdio</a> website.</p>
         </div>
     </div>
 

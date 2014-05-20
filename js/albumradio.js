@@ -164,13 +164,16 @@
             var self = this;
             var was_skippy = self.skippy;
             self.skippy = false;
+
+            var curr_track = R.player.playingTrack();
+            document.getElementById("current_track").innerHTML = "Now playing: " + curr_track.get("name") + " by " + curr_track.get("artist");
             var debug_box = document.querySelector('#debugging');
             if (localStorage.album_radio_playlist == R.player.playingSource().get("key")) {
                 console.log('Played a song from your playlist - trimming start of playlist');
                 var player_source_playlist = R.player.playingSource();
                 document.getElementById('playlist_name').innerHTML = player_source_playlist.get("name");
                 var tracks = player_source_playlist.get("tracks");
-                var curr_song = R.player.playingTrack().get("key");
+                var curr_song = curr_track.get("key");
                 var album_box = document.getElementById('album_box');
                 var current_album_element = album_box.getElementsByClassName('ar-big-album')[0];
                 var curr_album = null;
@@ -341,7 +344,7 @@
             } else {
                 var html = ''
                 + '<div class="album-cover">'
-                + '<a href="http://www.rdio.com' + rdioUtils._escape(album.url) + '">'
+                + '<a href="http://www.rdio.com' + rdioUtils._escape(album.url) + '" target="rdio">'
                 + '<div class="album-icon" style="background-image: url(' + rdioUtils._escape(album.icon) + ')"></div>'
                 //+ '<div class="album-hover-overlay">'
                 //+ '<div class="album-play-btn"></div>'
