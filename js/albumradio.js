@@ -48,6 +48,15 @@
                 self.skippy = true;
                 R.player.next();
             });
+
+            var album_box = document.getElementById('album_box');
+            new Sortable(document.getElementById("album_box"), {
+                draggable: '.ar-small-album',
+                onUpdate: function (evt) {
+                    var i = Array.prototype.indexOf.call(album_box.childNodes, evt.item);
+                    self.moveAlbum(evt.item.id, i);
+                }
+            });
         },
 
         beenAuthenticated: function() {
@@ -678,6 +687,55 @@
             return val.replace(/^([a-z])/, function ($0, $1) {
                 return $1.toUpperCase();
             });
+        },
+
+        moveAlbum: function (album_key, new_album_index) {
+            var self = this;
+            var player_source_playlist = R.player.playingSource();
+            var album_track_map = _.groupBy(player_source_playlist.get("tracks").models, function (track) { return track.get("albumKey"); });
+            var album_keys = _.keys(album_track_map);
+            var orig_album_index = album_keys.indexOf(album_key);
+            var new_track_order = [];
+            var index = 0;
+            var moving_back = new_album_index < orig_album_index;
+            _.each(album_track_map, function (tracks, album) {
+                if (index == new_album_index) {
+                    var keys = _.map(album_track_map[album_key], function (track) { return track.get("key"); });
+                    new_track_order = new_track_order.concat(keys);
+                    new_album_index = -200; //so we never come in here again
+                }
+                if (album != album_key) {
+                    var keys = _.map(tracks, function (track) { return track.get("key"); });
+                    new_track_order = new_track_order.concat(keys);
+                }
+
+                index++;
+            });
+            var nto = new_track_order.join(',');
+            R.request({
+                method: 'setPlaylistOrder',
+                content: {
+                    playlist: localStorage.album_radio_playlist,
+                    tracks: nto
+                },
+                success: function (data) {
+                    if (data == null) {
+                        self.populateAlbumsBox();
+                        var debug_box = document.querySelector('#debugging');
+                        var debug_message = document.createElement('p');
+                        debug_message.innerHTML = 'There was a problem reordering your playlist, please try again';
+                        debug_box.appendChild(debug_message);
+                        if (debug_box.children.length > 4)
+                            debug_box.removeChild(debug_box.children[0]);
+                    }
+                    else {
+                        console.log("whoopee");
+                    }
+                },
+                error: function (response) {
+                    console.log("error: " + response.message);
+                }
+            });
         }
     };
 
@@ -723,95 +781,6 @@
         });
     });
 
-    //REGION Handle drops, html style
-    var drop_area = document.body; 
-
-    drop_area.addEventListener('dragstart', function (e) {
-        e.dataTransfer.setData('text/html', self.innerHTML);
-        e.dataTransfer.effectAllowed = 'copy';
-    }, false);
-
-    drop_area.addEventListener('dragenter', function (e) {
-        e.preventDefault();
-        e.dataTransfer.dropEffect = 'copy';
-        self.classList.add('over');
-    }, false);
-
-    drop_area.addEventListener('dragover', function (e) {
-        e.preventDefault();
-        e.dataTransfer.dropEffect = 'copy';
-        return false;
-    }, false);
-
-    drop_area.addEventListener('dragleave', function (e) {
-        e.preventDefault();
-        self.classList.remove('over');
-    }, false);
-
-    drop_area.addEventListener('drop', function (e) {
-        e.preventDefault();
-        console.log('droppy ' + e.dataTransfer.getData('text'));
-/*
-        var drop = models.Playlist.fromURI(e.dataTransfer.getData('text'));
-        self.classList.remove('over');
-        var success_message = document.createElement('p');
-        success_message.innerHTML = 'Playlist successfully dropped: ' + drop.uri;
-        self.appendChild(success_message);
-        drop.load('owner').done(function (playlist) {
-            playlist.owner.load('currentUser').done(function (owner) {
-                if (owner.currentUser) {
-                    var allowed_message = document.createElement('p');
-                    allowed_message.innerHTML = 'You are the owner of this playlist, let\'s get to work!';
-                    drop_box.appendChild(allowed_message);
-                    setTimeout(function () {
-                        allowed_message.remove();
-                    }, 5000);
-                    localStorage.album_radio_playlist = drop.uri;
-                    document.getElementById('noplaylistmsg').style.display = 'none';
-                    populateAlbumsBox();
-                }
-                else {
-                    var disallowed_message = document.createElement('p');
-                    disallowed_message.innerHTML = 'You are not the owner of this playlist, choose a different one please!';
-                    drop_box.appendChild(disallowed_message);
-                    setTimeout(function () {
-                        disallowed_message.remove();
-                    }, 5000);
-                    localStorage.album_radio_playlist = null;
-                    document.getElementById('noplaylistmsg').style.display = '';
-                }
-            });
-        });
-*/
-    }, false);
-
-
-    //ENDREGION drag/drop
-
-    //only pass callback to this
-
-
-    //ENDREGION
-
-    //REGION initial setup
-/*
-    // find out initial status of the player
-    models.player.load(['context']).done(function (player) {
-        if (models.player.context) {
-            console.log("currently playing from context (playlist) " + models.player.context.uri);
-        }
-        / * Test for Niz on IRC
-        models.player.playContext(models.Playlist.fromURI(localStorage.album_radio_playlist));
-        setTimeout(function() {
-            models.player.pause();
-            setTimeout(function() {
-                models.player.play();}, 
-                5000);},
-            5000);
-            * /
-    });
-*/
-    //ENDREGION initial setup
 
     //REGION Stuff for html page
     var rm = $(".readmore");
@@ -829,255 +798,3 @@
     });
     //ENDREGION html tomfoolery
 
-    /*models.player.addEventListener('change', function (e) {
-        console.log(e);
-        console.log(e.data.duration); //this seems to indicate skipped, if 0
-        console.log(e.data.track.uri);
-        console.log(e.target.track);
-    });*/	
-
-/*
-    models.player.addEventListener('change:track', function (e) {
-        if (localStorage.album_radio_playlist) {
-            var debug_box = document.querySelector('#debugging');
-            if (models.player.context && models.player.context.uri.substr(-22) == localStorage.album_radio_playlist.substr(-22)) {
-                console.log('Played a song from your playlist - trimming start of playlist');
-                var playlist = models.Playlist.fromURI(localStorage.album_radio_playlist);
-                playlist.load('tracks').done(function (tracks) {
-                    playlist.tracks.snapshot(0, 500).done(function (playlist_tracks) {
-                        if (playlist_tracks.find(models.player.track)) {
-                            playlist.tracks.snapshot(0, 1).done(function (sn) { deletePlayed(playlist, sn); });
-                            if (playlist_tracks.length/ *-num_deleted* / <= 500) {
-                                //add an album
-                                var artists = [];
-                                if (e.target.duration != 0) {
-                                    e.oldValue.artists.forEach(function (a) { artists.push(a); });
-                                    artists[0].load('related').done(function (related) {
-                                        artists[0].related.snapshot().done(function (related_artists_snapshot) {
-                                            var related_artists = related_artists_snapshot.toArray();
-                                            related_artists.forEach(function (rel) { artists.push(rel); });
-                                            //TODO: add starred and subscribed artists
-                                            addRandomArtistAlbum(artists);
-                                        });
-                                    });
-                                } else {
-                                    console.log('you skipped a song, populating from starred artists');
-                                    var library = Library.forCurrentUser();
-                                    library.starred.load('tracks').done(function (starred_playlist) { 
-                                        starred_playlist.tracks.snapshot().done(function (snapshot) {
-                                            snapshot.loadAll('artists')
-                                                .each(function (track) {
-                                                    if (artists.indexOf(track.artists[0]) == -1) {
-                                                        artists.push(track.artists[0]);
-                                                    }
-                                                })
-                                                .done(function (tracks) {
-                                                    addRandomArtistAlbum(artists);
-                                                });
-                                        });
-                                    });
-                                }
-                            } else {
-                                console.log("we have enough songs");
-                            }
-                        }
-                    });
-                });
-            }
-        }
-    });
-*/
-
-    /* from  http://stackoverflow.com/questions/19761821/return-top-track-spotify-api
-    keeping around for future toplist access
-    function doGetTopTrack(artist, num, callback) {
-        var artistTopList = Toplist.forArtist(artist);
-
-        artistTopList.tracks.snapshot(0,num).done(function (snapshot) { //only get the number of tracks we need
-
-            snapshot.loadAll('name').done(function (tracks) {
-                var i, num_toptracks;
-                num_toptracks = num; //this probably should be minimum of num and tracks.length
-
-                for (i = 0; i < num_toptracks; i++) {
-                    callback(artist, tracks[i]);
-                }
-            });
-        });
-    };
-
-    function showRelated() {
-        var artist_properties = ['name', 'popularity', 'related', 'uri'];
-
-        models.Artist
-          .fromURI('spotify:artist:11FY888Qctoy6YueCpFkXT')
-          .load(artist_properties)
-          .done(function (artist) {
-
-              artist.related.snapshot().done(function (snapshot) {
-                  snapshot.loadAll('name').done(function (artists) {
-
-                      for (var i = 0; i < artists.length; i++) {
-                          // am I missing something here?
-                          doGetTopTrack(artists[i], 1, function (artist, toptrack) {
-                                  console.log("top track: " + toptrack.name);
-
-                                  // store artist details
-                                  var p = artist.popularity;
-                                  var n = artist.name;
-                                  var u = artist.uri;
-
-                                  //listItem = document.createElement("li");
-                                  console.log("<strong>Name</strong>: " + n.decodeForText() + " | <strong>Popularity: </strong> " + p + " | <strong>Top Track: </strong>" + toptrack.name);
-
-                                  //// undefined name
-                                  //$('#artistsContainer').append(listItem);
-                          });
-                      }
-                  });
-
-              });
-          });
-    };
-    showRelated();
-    */
-
-/*
-}
-);
-*/
-
-
-/* for http://stackoverflow.com/questions/19763090/spotify-app-fire-function-on-change-position
-
-require(['$api/audio', '$api/models', '$views/utils/frame#throttle'], function (audio, models, throttle) {
-    var analyzer = audio.RealtimeAnalyzer.forPlayer(models.player);
-    console.log('peep');
-
-    var last_position = -1;
-    analyzer.addEventListener('audio', function (evt) {
-        models.player.load('position').done(function() {
-            if(models.player.position != last_position) { 
-                console.log(models.player.position + ", " + (models.player.position-last_position)); 
-                last_position = models.player.position;
-            }
-        });
-    });
-    console.log('peep');
-});*/
-
-/* for http://stackoverflow.com/questions/20440664/incorrect-snapshot-length-returned-for-a-specific-playlist
-require(['$api/models'], function(models) {
-    var playlist = models.Playlist.fromURI("spotify:user:juan20150:playlist:5rl5QaWjWtEPv9a057w3qc");
-    playlist.load('tracks').done(function() {
-
-        playlist.tracks.snapshot().done(function(snapshot) {
-            console.log("snapshot length " + snapshot.length);
-            var i=0;
-            snapshot.loadAll('name')
-                //.each(function(t) { console.log(i++); })
-               .done(function(snap_tracks) { console.log("loaded tracks length " + snap_tracks.length); })
-               .fail(function(track, error) { console.log(error + ". " + track.length); });
-        });
-
-    });
-});
-*/
-
-/* for http://stackoverflow.com/a/20478974/9970
-require(['$api/models'], function(models) {
-var mySpotify =
-{
-  playerNextTrack: function()
-  {
-    models.player.skipToNextTrack();
-  },
-}
-
-var playtest = document.querySelector('#playtest');
-playtest.addEventListener('click', function() { mySpotify.playerNextTrack(); });
-
-});*/
-
-/* from sample code, to repro http://stackoverflow.com/questions/20907867/realtimeanalyzer-memory 
-var numRows = 16, bars = [];
-for (var i = 0; i < numRows * 2; i++) {
-    var bar = document.createElement('meter');
-    bar.min = -1;
-    document.body.appendChild(bar);
-
-    // Add a newline after each pair of bars.
-    if (i % 2) document.body.appendChild(document.createElement('br'));
-
-    bars.push(bar);
-}
-
-require(['$api/audio', '$api/models'], function (audio, models) {
-    var analyzer = audio.RealtimeAnalyzer.forPlayer(models.player);
-
-    analyzer.addEventListener('audio', function (evt) {
-        // There will be 256 samples, but we want to only display every [step]
-        // samples because we have fewer than 256 rows.
-        var step = 256 / numRows;
-        for (var i = 0; i < numRows; i++) {
-            bars[i * 2].value = evt.audio.wave.left[step * i];
-            bars[i * 2 + 1].value = evt.audio.wave.right[step * i];
-        }
-    });
-});
-*/
-
-/*
-require(['$api/models'], function(models) {
-
-    models.player.addEventListener('change:context', contextChanged);
-
-    var last_context=null;
-    function contextChanged(e) {
-        if(last_context != e.target.context.uri) {
-            last_context = e.target.context.uri;
-            console.log('hola, new context uri - ' + last_context);
-        }
-        else {
-            console.log('faux context change');
-        }
-    }
-});
-*/
-
-/* http://stackoverflow.com/questions/21178883/how-to-get-list-of-artist-following-in-spotify 
-require(['$api/models', '$api/relations#Relations'], function (models, Relations) {
-  var rels = Relations.forCurrentUser();
-  rels.combinedSubscriptions.snapshot().done(function(snapshot) {
-    console.log('You are following ' +  snapshot.length + ' users/artists.');
-    console.log('Here are your followings:' + snapshot.toArray());
-    var deftones = models.Artist.fromURI('spotify:artist:6Ghvu1VvMGScGpOUJBAHNH');
-    console.log(snapshot.find(deftones));
-    var notdeftones = models.Artist.fromURI('spotify:artist:6Ghvu1VvMGScGpOUJBAHHH');
-    console.log(snapshot.find(notdeftones));
-  });
-});
-*/
-
-/* http://stackoverflow.com/questions/22121781/spotifys-collections-shuffle-method-not-working-as-expected
-    require(['$api/models'], function (models) {
-        playlist = models.Playlist.fromURI(localStorage.album_radio_playlist);
-
-        playlist.load('tracks').done(function (tracks) {
-            console.log(tracks);
-            // Works when shuffle() is removed                    
-            playlist.tracks.shuffle().snapshot()
-              .done(
-
-                function (snapshot) {
-                    console.log(snapshot);
-
-                    for (var i = 0; i < snapshot.length; i++) {
-                        var track = snapshot.get(i);
-                        console.log(track.name);
-                    }
-                }
-              ).fail(function (blah, err) { console.log("failed to shuffle " + err + ", " + blah); });
-        });
-    });
-    */

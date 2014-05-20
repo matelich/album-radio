@@ -77,12 +77,12 @@
                 <ul>
                     <li>The playlist must have one or more songs.</li>
                     <li>It's recommended to take a few songs from your favorite artists to initially fill up the playlist</li>
-                    <li>You can switch between multiple playlists, just drag them to the playlist box below</li>
+                    <li>You can drag and drop albums to reorder the playlist</li>
                 </ul>
                 </li>
                 <li>Album Radio deletes played songs from the start of your playlist.  Every time a track changes, Album Radio checks to see if there are less than 500 songs in your playlist. If so, it will add an album to the end.  If you skipped a track, the artist will be selected from your Collection, otherwise an artist will be chosen from the completed songs' related artists.
                 <ul>
-                    <li>Album Radio can only detect song skipping if it is managing the playback</li>
+                    <li>Album Radio currently can only detect song skipping if you use the skip button <!--<svg class="button"><use xlink:href="#fwd-button-shape"></svg>--></li>
                 </ul>
                 </li>
             </ol>
@@ -129,6 +129,7 @@
     <script src="js/flipclock/flipclock.js"></script>
     <script src="js/flipclock/faces/counter.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore-min.js"></script>
+    <script src="js/Sortable.min.js"></script>
     <script src="js/rdio-utils.js"></script>
     <script src="js/albumradio.js"></script>
 </body>
